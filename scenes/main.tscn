@@ -2,8 +2,31 @@
 
 [ext_resource type="PackedScene" uid="uid://d2xpr0pwj0312" path="res://scenes/mouse.tscn" id="2_0wfyh"]
 
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_o5qli"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_0wfyh"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sugp2"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_jyhfs"]
+material = SubResource("StandardMaterial3D_sugp2")
+radius = 10.0
+height = 20.0
+
 [node name="Main" type="Node2D" unique_id=1990201257]
 
 [node name="Mouse" parent="." unique_id=1278409488 instance=ExtResource("2_0wfyh")]
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=2027311616]
+
+[node name="Ball" type="Node2D" parent="." unique_id=136381969]
+position = Vector2(0, -62)
+
+[node name="RigidBody2D" type="RigidBody2D" parent="Ball" unique_id=526697306]
+physics_material_override = SubResource("PhysicsMaterial_o5qli")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Ball/RigidBody2D" unique_id=1036512078]
+shape = SubResource("CircleShape2D_0wfyh")
+
+[node name="MeshInstance2D" type="MeshInstance2D" parent="Ball/RigidBody2D" unique_id=589185099]
+mesh = SubResource("SphereMesh_jyhfs")

@@ -88,6 +88,9 @@ animations = [{
 "speed": 10.0
 }]
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ouscy"]
+size = Vector2(48, 32)
+
 [node name="Mouse" type="Node2D" unique_id=1990201257]
 script = ExtResource("1_ouscy")
 
@@ -96,3 +99,9 @@ sprite_frames = SubResource("SpriteFrames_tefeu")
 animation = &"idle"
 autoplay = "idle"
 frame_progress = 0.14082336
+
+[node name="StaticBody2D" type="StaticBody2D" parent="." unique_id=350360245]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D" unique_id=1738492910]
+position = Vector2(0, -1)
+shape = SubResource("RectangleShape2D_ouscy")
