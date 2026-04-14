@@ -23,8 +23,8 @@ func machine_start_activate() -> void:
 	add_child(startup_timer)
 	startup_timer.start(activate_startup_time)
 
+func machine_on_collided(node: Node2D) -> void:
+	print("Something touched this machine")
 
 func _ready() -> void:
-	# For now activate immediately
 	print(sprite.animation)
-	machine_start_activate()

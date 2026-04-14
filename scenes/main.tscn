@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://bxrjkx8lfwyho"]
 
 [ext_resource type="PackedScene" uid="uid://d2xpr0pwj0312" path="res://scenes/mouse.tscn" id="2_0wfyh"]
+[ext_resource type="Script" uid="uid://bwxpwj8nrum" path="res://scripts/machine_physics_object.gd" id="2_sugp2"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_o5qli"]
 
@@ -21,12 +22,17 @@ height = 20.0
 
 [node name="Ball" type="Node2D" parent="." unique_id=136381969]
 position = Vector2(0, -62)
+script = ExtResource("2_sugp2")
 
 [node name="RigidBody2D" type="RigidBody2D" parent="Ball" unique_id=526697306]
 physics_material_override = SubResource("PhysicsMaterial_o5qli")
+contact_monitor = true
+max_contacts_reported = 5
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Ball/RigidBody2D" unique_id=1036512078]
 shape = SubResource("CircleShape2D_0wfyh")
 
 [node name="MeshInstance2D" type="MeshInstance2D" parent="Ball/RigidBody2D" unique_id=589185099]
 mesh = SubResource("SphereMesh_jyhfs")
+
+[connection signal="body_entered" from="Ball/RigidBody2D" to="Ball" method="_on_rigid_body_2d_body_entered"]

@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://d2xpr0pwj0312"]
 
-[ext_resource type="Script" uid="uid://c6quoe1mrcnif" path="res://scripts/machine.gd" id="1_ouscy"]
+[ext_resource type="Script" uid="uid://0e05jfxwfrf" path="res://scenes/mouse.gd" id="1_ouscy"]
 [ext_resource type="Texture2D" uid="uid://dhbra0uiwmkcj" path="res://sprites/machines/all_machines.png" id="2_xa71f"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_o5qli"]
@@ -105,3 +105,5 @@ frame_progress = 0.14082336
 [node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D" unique_id=1738492910]
 position = Vector2(0, -1)
 shape = SubResource("RectangleShape2D_ouscy")
+
+[connection signal="input_event" from="StaticBody2D" to="." method="_on_static_body_2d_input_event"]
