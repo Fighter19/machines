@@ -1,0 +1,6 @@
+# Godot 4+ specific ignores
+.godot/
+/android/
+
+# Prototype assets to exclude from source control
+all_machines.png*

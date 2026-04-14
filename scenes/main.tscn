@@ -1,0 +1,100 @@
+[gd_scene format=3 uid="uid://bxrjkx8lfwyho"]
+
+[ext_resource type="Texture2D" uid="uid://dhbra0uiwmkcj" path="res://sprites/machines/all_machines.png" id="1_0wfyh"]
+[ext_resource type="Script" uid="uid://c6quoe1mrcnif" path="res://scripts/machine.gd" id="1_sugp2"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_o5qli"]
+atlas = ExtResource("1_0wfyh")
+region = Rect2(662, 789, 48, 42)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0wfyh"]
+atlas = ExtResource("1_0wfyh")
+region = Rect2(714, 789, 48, 42)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sugp2"]
+atlas = ExtResource("1_0wfyh")
+region = Rect2(766, 789, 48, 42)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jyhfs"]
+atlas = ExtResource("1_0wfyh")
+region = Rect2(818, 789, 48, 42)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_tefeu"]
+atlas = ExtResource("1_0wfyh")
+region = Rect2(5, 789, 48, 42)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_o6xl0"]
+atlas = ExtResource("1_0wfyh")
+region = Rect2(57, 789, 48, 42)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_tipki"]
+atlas = ExtResource("1_0wfyh")
+region = Rect2(109, 789, 48, 42)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_85g3d"]
+atlas = ExtResource("1_0wfyh")
+region = Rect2(161, 789, 48, 42)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_choun"]
+atlas = ExtResource("1_0wfyh")
+region = Rect2(213, 789, 48, 42)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_tefeu"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_o5qli")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0wfyh")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_sugp2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jyhfs")
+}],
+"loop": true,
+"name": &"active",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_tefeu")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_o6xl0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_tipki")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_85g3d")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_choun")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_85g3d")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_tipki")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_o6xl0")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 10.0
+}]
+
+[node name="Mouse" type="Node2D" unique_id=1990201257]
+script = ExtResource("1_sugp2")
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=1440653774]
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1643466824]
+sprite_frames = SubResource("SpriteFrames_tefeu")
+animation = &"idle"
+autoplay = "idle"
+frame_progress = 0.14082336
