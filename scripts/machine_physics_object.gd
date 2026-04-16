@@ -1,7 +1,7 @@
 extends Node2D
 class_name MachinePhysicsObject
 
-func _on_rigid_body_2d_body_entered(body: Node) -> void:
+func _on_body_entered(body: Node) -> void:
 	print("Rigid body ball entered")
 	print(body)
 	if body.get_parent() is MachinePhysicsObject:

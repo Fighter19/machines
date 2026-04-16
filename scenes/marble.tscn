@@ -1,0 +1,47 @@
+[gd_scene format=3 uid="uid://i4ni7f5u85c4"]
+
+[ext_resource type="Script" uid="uid://bwxpwj8nrum" path="res://scripts/machine_physics_object.gd" id="1_jmcsv"]
+[ext_resource type="Texture2D" uid="uid://be5ylr76a3g8b" path="res://sprites/machines/marble_light_blue.png" id="2_q8mev"]
+[ext_resource type="Texture2D" uid="uid://q3cts48ahtja" path="res://sprites/machines/glare.png" id="3_rym2u"]
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_o5qli"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_0wfyh"]
+
+[node name="Marble" type="Node" unique_id=963918236]
+
+[node name="RigidBody2D" type="RigidBody2D" parent="." unique_id=1368098340]
+position = Vector2(0, -62)
+physics_material_override = SubResource("PhysicsMaterial_o5qli")
+contact_monitor = true
+max_contacts_reported = 5
+linear_velocity = Vector2(15, 0)
+script = ExtResource("1_jmcsv")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RigidBody2D" unique_id=11888273]
+shape = SubResource("CircleShape2D_0wfyh")
+
+[node name="RemoteTransform2D" type="RemoteTransform2D" parent="RigidBody2D/CollisionShape2D" unique_id=1931262131]
+scale = Vector2(0.355, 0.355)
+remote_path = NodePath("../../../Node2D/Sprite2D")
+
+[node name="RemoteTransform2D2" type="RemoteTransform2D" parent="RigidBody2D/CollisionShape2D" unique_id=1961678086]
+position = Vector2(0, 1.9073486e-06)
+scale = Vector2(0.355, 0.355)
+remote_path = NodePath("../../../Node2D/Node2D")
+update_rotation = false
+
+[node name="Node2D" type="Node2D" parent="." unique_id=414763143]
+position = Vector2(0, -62)
+scale = Vector2(0.355, 0.355)
+
+[node name="Sprite2D" type="Sprite2D" parent="Node2D" unique_id=1497384862]
+texture = ExtResource("2_q8mev")
+
+[node name="Node2D" type="Node2D" parent="Node2D" unique_id=1089792930]
+
+[node name="Sprite2D2" type="Sprite2D" parent="Node2D/Node2D" unique_id=1809714514]
+position = Vector2(8.451, -19.718)
+texture = ExtResource("3_rym2u")
+
+[connection signal="body_entered" from="RigidBody2D" to="RigidBody2D" method="_on_body_entered"]
