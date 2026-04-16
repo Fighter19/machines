@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://bxrjkx8lfwyho"]
 
 [ext_resource type="PackedScene" uid="uid://d2xpr0pwj0312" path="res://scenes/mouse.tscn" id="2_0wfyh"]
+[ext_resource type="PackedScene" uid="uid://dbuawikin6djx" path="res://scenes/eraser.tscn" id="2_jyhfs"]
 [ext_resource type="PackedScene" uid="uid://i4ni7f5u85c4" path="res://scenes/marble.tscn" id="2_sugp2"]
 
 [node name="Main" type="Node2D" unique_id=1990201257]
@@ -9,4 +10,9 @@
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=2027311616]
 
+[node name="Node" parent="." unique_id=1564238713 instance=ExtResource("2_jyhfs")]
+position = Vector2(3, -34)
+
 [node name="Marble" parent="." unique_id=963918236 instance=ExtResource("2_sugp2")]
+
+[editable path="Marble"]
