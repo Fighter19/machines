@@ -26,5 +26,9 @@ func machine_start_activate() -> void:
 func machine_on_collided(node: Node2D) -> void:
 	print("Something touched this machine")
 
+func machine_on_mode_changed(mode: GameMode.MachineGameMode):
+	# Virtual function to be overloaded
+	pass
+
 func _ready() -> void:
 	print(sprite.animation)
