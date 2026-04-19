@@ -45,3 +45,5 @@ position = Vector2(8.451, -19.718)
 texture = ExtResource("3_rym2u")
 
 [connection signal="body_entered" from="RigidBody2D" to="RigidBody2D" method="_on_body_entered"]
+[connection signal="mouse_entered" from="RigidBody2D" to="RigidBody2D" method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="RigidBody2D" to="RigidBody2D" method="_on_mouse_exited"]

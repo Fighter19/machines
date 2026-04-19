@@ -26,3 +26,28 @@ func on_mode_changed(mode: MachineGameMode) -> void:
 			print("This is a rigid body and the mode changed to edit")
 			var self_rigid = $"." as RigidBody2D
 			self_rigid.freeze = false
+
+# This is needlessly complicated, godot has _on_mouse*
+#func _input(event: InputEvent) -> void:
+	#if event is InputEventMouseMotion:
+		#var query = PhysicsPointQueryParameters2D.new()
+		#query.position = get_global_mouse_position()
+		#query.collide_with_areas = true
+		#query.collide_with_bodies = true
+		#
+		#var result = get_world_2d().direct_space_state.intersect_point(query, 1)
+		#if result.size() > 0:
+			#print("Collided with something")
+			#print(result)
+			#print(result[0].collider)
+			#if result[0].collider is MachinePhysicsObject:
+				#print("Collided with MachinePhysicsObject")
+
+var grab_cursor = load("res://sprites/ui/grab.png")
+
+func _on_mouse_entered() -> void:
+	Input.set_custom_mouse_cursor(grab_cursor, 0, Vector2(12, 18))
+
+
+func _on_mouse_exited() -> void:
+	Input.set_custom_mouse_cursor(null)
