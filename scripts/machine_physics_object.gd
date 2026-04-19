@@ -2,6 +2,8 @@ extends Node2D
 class_name MachinePhysicsObject
 
 const MachineGameMode = GameMode.MachineGameMode
+var is_hovering: bool = false
+var is_grabbed: bool = false
 
 func _on_body_entered(body: Node) -> void:
 	print("Rigid body ball entered")
@@ -47,7 +49,29 @@ var grab_cursor = load("res://sprites/ui/grab.png")
 
 func _on_mouse_entered() -> void:
 	Input.set_custom_mouse_cursor(grab_cursor, 0, Vector2(12, 18))
+	is_hovering = true
 
 
 func _on_mouse_exited() -> void:
 	Input.set_custom_mouse_cursor(null)
+	is_hovering = false
+
+
+func _on_input_event(viewport: Node, event: InputEvent, shape_idx: int) -> void:
+	if event is InputEventMouseButton:
+		if event.button_index == 1 && event.pressed == true:
+			is_grabbed = true
+		# This also wouldn't work reliably
+		#elif event.button_index == 1 && event.pressed == false:
+			#is_grabbed = false
+			
+	# Can't check for motion event here to move object,
+	# if the object is moved too fast, it will not receive further events
+
+
+func _process(delta: float) -> void:
+	if is_grabbed:
+		position = get_global_mouse_position()
+
+	if !Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+		is_grabbed = false
