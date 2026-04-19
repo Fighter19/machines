@@ -4,8 +4,21 @@
 [ext_resource type="PackedScene" uid="uid://dbuawikin6djx" path="res://scenes/eraser.tscn" id="2_jyhfs"]
 [ext_resource type="PackedScene" uid="uid://i4ni7f5u85c4" path="res://scenes/marble.tscn" id="2_sugp2"]
 [ext_resource type="Script" uid="uid://uoodueoyb0h7" path="res://scripts/game_mode.gd" id="4_jyhfs"]
+[ext_resource type="Texture2D" uid="uid://b3pl5wwhfnvf3" path="res://sprites/karriertes_papier.png" id="5_tbgi4"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_tbgi4"]
+font_color = Color(0, 0, 0, 1)
 
 [node name="Main" type="Node2D" unique_id=1990201257]
+
+[node name="TextureRect" type="TextureRect" parent="." unique_id=2089064171]
+offset_left = -576.0
+offset_top = -324.0
+offset_right = 1706.0762
+offset_bottom = 961.14844
+scale = Vector2(0.505, 0.505)
+texture = ExtResource("5_tbgi4")
+stretch_mode = 1
 
 [node name="Mouse" parent="." unique_id=1278409488 instance=ExtResource("2_0wfyh")]
 
@@ -36,6 +49,7 @@ offset_top = 12.0
 offset_right = 229.0
 offset_bottom = 35.0
 text = "Mode: Play"
+label_settings = SubResource("LabelSettings_tbgi4")
 
 [connection signal="toggled" from="GameModeController/Button" to="GameModeController" method="_on_button_toggled"]
 
