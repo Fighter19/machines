@@ -8,15 +8,18 @@ enum MachineGameMode
 }
 
 var current_mode: MachineGameMode = MachineGameMode.PLAY
-@export var game_mode_button: = Button
-@export var game_mode_label: = Label
+@export var game_mode_button: Button
+@export var game_mode_label: Label
 
 # Synchronize UI with state
 func update_mode():
+	if game_mode_button == null:
+		return
+
 	if current_mode == MachineGameMode.PLAY:
-		game_mode_label.text = "Mode: Play"
+		game_mode_button.text = "Mode: Play"
 	else:
-		game_mode_label.text = "Mode: Edit"
+		game_mode_button.text = "Mode: Edit"
 
 func notify_children(base: Node, new_mode: MachineGameMode):
 	for child in base.get_children():

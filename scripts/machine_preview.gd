@@ -17,6 +17,7 @@ var is_dragging_machine: bool = false
 var menu_layer: CanvasLayer
 var menu_panel: PanelContainer
 var menu_title_label: Label
+var menu_content: VBoxContainer
 var menu_buttons: Dictionary = {}
 var last_known_mode: int = -1
 
@@ -34,6 +35,7 @@ func _ready() -> void:
 
 	selected_type = _first_available_type(selected_type)
 	_create_left_menu()
+	_attach_game_mode_controls_to_menu()
 	_update_menu_contents()
 	_refresh_preview_instance()
 
@@ -173,13 +175,13 @@ func _create_left_menu() -> void:
 	menu_panel.offset_bottom = 0
 	menu_layer.add_child(menu_panel)
 
-	var content := VBoxContainer.new()
-	content.add_theme_constant_override("separation", 8)
-	menu_panel.add_child(content)
+	menu_content = VBoxContainer.new()
+	menu_content.add_theme_constant_override("separation", 8)
+	menu_panel.add_child(menu_content)
 
 	menu_title_label = Label.new()
 	menu_title_label.text = "Inventory"
-	content.add_child(menu_title_label)
+	menu_content.add_child(menu_title_label)
 
 	for machine_type in [
 		MachineInventoryData.MachineType.MARBLE,
@@ -188,7 +190,7 @@ func _create_left_menu() -> void:
 	]:
 		var row := HBoxContainer.new()
 		row.add_theme_constant_override("separation", 8)
-		content.add_child(row)
+		menu_content.add_child(row)
 
 		var icon := TextureRect.new()
 		icon.custom_minimum_size = Vector2(64, 64)
@@ -208,7 +210,29 @@ func _create_left_menu() -> void:
 	var hint_label := Label.new()
 	hint_label.text = "Hold left mouse on an item,\ndrag into the world, release to drop."
 	hint_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	content.add_child(hint_label)
+	menu_content.add_child(hint_label)
+
+func _attach_game_mode_controls_to_menu() -> void:
+	if menu_content == null:
+		return
+
+	if game_mode_controller == null:
+		return
+
+	var game_mode_button := game_mode_controller.get_node_or_null("Button") as Button
+	if game_mode_button == null:
+		return
+
+	if game_mode_button.get_parent() != menu_content:
+		game_mode_button.reparent(menu_content)
+	menu_content.move_child(game_mode_button, 0)
+
+	game_mode_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	game_mode_button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+
+	var mode_label := game_mode_button.get_node_or_null("Label") as Label
+	if mode_label != null:
+		mode_label.visible = false
 
 func _update_menu_contents() -> void:
 	var edit_mode := _is_edit_mode()
