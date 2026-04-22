@@ -9,6 +9,21 @@ var is_grabbed: bool = false
 var current_mode = MachineGameMode.EDIT
 
 var edit_position: Vector2
+var has_saved_edit_position: bool = false
+
+func _ready() -> void:
+	# Seed restore position from the current transform so freshly spawned
+	# objects do not jump when edit mode is applied.
+	var drag_target := _get_drag_target()
+	edit_position = drag_target.position
+	has_saved_edit_position = true
+
+func _get_drag_target() -> Node2D:
+	# For machine scenes where this script is attached to a child collider,
+	# move the machine root instead so visuals and collision stay aligned.
+	if get_parent() is Node2D and get_parent() is Machine:
+		return get_parent() as Node2D
+	return self as Node2D
 
 func _on_body_entered(body: Node) -> void:
 	print("Rigid body ball entered")
@@ -23,18 +38,23 @@ func _on_body_entered(body: Node) -> void:
 
 func on_mode_changed(mode: MachineGameMode) -> void:
 	current_mode = mode
+	var drag_target := _get_drag_target()
 	if mode == MachineGameMode.EDIT:
-		# Restore old position
-		position = edit_position
+		if has_saved_edit_position:
+			# Restore old position captured when switching into play mode.
+			drag_target.position = edit_position
 		if $"." is RigidBody2D:
 			print("This is a rigid body and the mode changed to play")
 			var self_rigid = $"." as RigidBody2D
 			self_rigid.freeze = true
 			self_rigid.freeze_mode = RigidBody2D.FREEZE_MODE_STATIC
+			self_rigid.linear_velocity = Vector2.ZERO
+			self_rigid.angular_velocity = 0.0
 	elif mode == MachineGameMode.PLAY:
 		# This assumes the previous mode was edit, so save it
 		# in order to restore it later
-		edit_position = position
+		edit_position = drag_target.position
+		has_saved_edit_position = true
 		if $"." is RigidBody2D:
 			print("This is a rigid body and the mode changed to edit")
 			var self_rigid = $"." as RigidBody2D
@@ -82,8 +102,15 @@ func _on_input_event(_viewport: Node, event: InputEvent, _shape_idx: int) -> voi
 
 
 func _process(_delta: float) -> void:
+	var drag_target := _get_drag_target()
 	if is_grabbed:
-		position = get_global_mouse_position()
+		drag_target.global_position = get_global_mouse_position()
+
+	# Keep the latest edit pose so switching back from play restores correctly,
+	# especially for rigidbody-based machines like the marble.
+	if current_mode == MachineGameMode.EDIT:
+		edit_position = drag_target.position
+		has_saved_edit_position = true
 
 	if !Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 		is_grabbed = false

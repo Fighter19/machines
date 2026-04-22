@@ -1,6 +1,8 @@
 extends Machine
 class_name Eraser
 
+@onready var physics_object: MachinePhysicsObject = $StaticBody2D
+
 func machine_on_collided(node: Node2D) -> void:
 	print("Collided with node " + node.to_string())
 	if node is RigidBody2D:
@@ -18,3 +20,7 @@ func _on_animated_sprite_2d_animation_finished() -> void:
 	if sprite.animation == "active":
 		sprite.play("idle")
 	pass # Replace with function body.
+
+func machine_on_mode_changed(mode: GameMode.MachineGameMode):
+	if physics_object != null:
+		physics_object.on_mode_changed(mode)

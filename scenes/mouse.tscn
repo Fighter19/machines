@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://0e05jfxwfrf" path="res://scenes/mouse.gd" id="1_ouscy"]
 [ext_resource type="Texture2D" uid="uid://dhbra0uiwmkcj" path="res://sprites/machines/all_machines.png" id="2_xa71f"]
+[ext_resource type="Script" uid="uid://bwxpwj8nrum" path="res://scripts/machine_physics_object.gd" id="3_4u0ll"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_o5qli"]
 atlas = ExtResource("2_xa71f")
@@ -101,7 +102,13 @@ autoplay = "idle"
 frame_progress = 0.14082336
 
 [node name="StaticBody2D" type="StaticBody2D" parent="." unique_id=350360245]
+input_pickable = true
+script = ExtResource("3_4u0ll")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D" unique_id=1738492910]
 position = Vector2(0, -1)
 shape = SubResource("RectangleShape2D_ouscy")
+
+[connection signal="input_event" from="StaticBody2D" to="StaticBody2D" method="_on_input_event"]
+[connection signal="mouse_entered" from="StaticBody2D" to="StaticBody2D" method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="StaticBody2D" to="StaticBody2D" method="_on_mouse_exited"]
