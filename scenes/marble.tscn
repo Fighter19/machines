@@ -12,6 +12,7 @@
 
 [node name="RigidBody2D" type="RigidBody2D" parent="." unique_id=1368098340]
 position = Vector2(0, -62)
+input_pickable = true
 physics_material_override = SubResource("PhysicsMaterial_o5qli")
 contact_monitor = true
 max_contacts_reported = 5
