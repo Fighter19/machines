@@ -8,6 +8,8 @@ var is_grabbed: bool = false
 # Still it's easier to just do it here
 var current_mode = MachineGameMode.EDIT
 
+var edit_position: Vector2
+
 func _on_body_entered(body: Node) -> void:
 	print("Rigid body ball entered")
 	print(body)
@@ -22,12 +24,17 @@ func _on_body_entered(body: Node) -> void:
 func on_mode_changed(mode: MachineGameMode) -> void:
 	current_mode = mode
 	if mode == MachineGameMode.EDIT:
+		# Restore old position
+		position = edit_position
 		if $"." is RigidBody2D:
 			print("This is a rigid body and the mode changed to play")
 			var self_rigid = $"." as RigidBody2D
 			self_rigid.freeze = true
 			self_rigid.freeze_mode = RigidBody2D.FREEZE_MODE_STATIC
 	elif mode == MachineGameMode.PLAY:
+		# This assumes the previous mode was edit, so save it
+		# in order to restore it later
+		edit_position = position
 		if $"." is RigidBody2D:
 			print("This is a rigid body and the mode changed to edit")
 			var self_rigid = $"." as RigidBody2D
