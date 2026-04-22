@@ -3,7 +3,9 @@
 [ext_resource type="PackedScene" uid="uid://d2xpr0pwj0312" path="res://scenes/mouse.tscn" id="2_0wfyh"]
 [ext_resource type="PackedScene" uid="uid://dbuawikin6djx" path="res://scenes/eraser.tscn" id="2_jyhfs"]
 [ext_resource type="PackedScene" uid="uid://i4ni7f5u85c4" path="res://scenes/marble.tscn" id="2_sugp2"]
+[ext_resource type="Script" path="res://scripts/machine_preview.gd" id="3_8v11n"]
 [ext_resource type="Script" uid="uid://uoodueoyb0h7" path="res://scripts/game_mode.gd" id="4_jyhfs"]
+[ext_resource type="Script" path="res://scripts/machine_inventory_data.gd" id="5_8v11n"]
 [ext_resource type="Texture2D" uid="uid://b3pl5wwhfnvf3" path="res://sprites/karriertes_papier.png" id="5_tbgi4"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_tbgi4"]
@@ -28,6 +30,17 @@ stretch_mode = 1
 position = Vector2(3, -34)
 
 [node name="Marble" parent="." unique_id=963918236 instance=ExtResource("2_sugp2")]
+
+[node name="MachineInventoryData" type="Node" parent="."]
+script = ExtResource("5_8v11n")
+marble_count = 9
+mouse_count = 5
+eraser_count = 3
+
+[node name="MachinePreview" type="Node2D" parent="." node_paths=PackedStringArray("inventory_data", "spawn_parent")]
+script = ExtResource("3_8v11n")
+inventory_data = NodePath("../MachineInventoryData")
+spawn_parent = NodePath("..")
 
 [node name="GameModeController" type="Node" parent="." unique_id=1651082934 node_paths=PackedStringArray("game_mode_button", "game_mode_label")]
 script = ExtResource("4_jyhfs")
