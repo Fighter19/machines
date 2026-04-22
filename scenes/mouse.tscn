@@ -105,5 +105,3 @@ frame_progress = 0.14082336
 [node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D" unique_id=1738492910]
 position = Vector2(0, -1)
 shape = SubResource("RectangleShape2D_ouscy")
-
-[connection signal="input_event" from="StaticBody2D" to="." method="_on_static_body_2d_input_event"]

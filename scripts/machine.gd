@@ -23,10 +23,10 @@ func machine_start_activate() -> void:
 	add_child(startup_timer)
 	startup_timer.start(activate_startup_time)
 
-func machine_on_collided(node: Node2D) -> void:
+func machine_on_collided(_node: Node2D) -> void:
 	print("Something touched this machine")
 
-func machine_on_mode_changed(mode: GameMode.MachineGameMode):
+func machine_on_mode_changed(_mode: GameMode.MachineGameMode):
 	# Virtual function to be overloaded
 	pass
 

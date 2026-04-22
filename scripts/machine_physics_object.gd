@@ -53,7 +53,7 @@ var grab_cursor = load("res://sprites/ui/grab.png")
 
 func _on_mouse_entered() -> void:
 	if current_mode == MachineGameMode.EDIT:
-		Input.set_custom_mouse_cursor(grab_cursor, 0, Vector2(12, 18))
+		Input.set_custom_mouse_cursor(grab_cursor, Input.CURSOR_ARROW, Vector2(12, 18))
 		is_hovering = true
 
 
@@ -62,7 +62,7 @@ func _on_mouse_exited() -> void:
 	is_hovering = false
 
 
-func _on_input_event(viewport: Node, event: InputEvent, shape_idx: int) -> void:
+func _on_input_event(_viewport: Node, event: InputEvent, _shape_idx: int) -> void:
 	if event is InputEventMouseButton:
 		if event.button_index == 1 && event.pressed == true && is_hovering:
 			is_grabbed = true
@@ -74,7 +74,7 @@ func _on_input_event(viewport: Node, event: InputEvent, shape_idx: int) -> void:
 	# if the object is moved too fast, it will not receive further events
 
 
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	if is_grabbed:
 		position = get_global_mouse_position()
 
