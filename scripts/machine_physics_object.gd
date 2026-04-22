@@ -4,6 +4,9 @@ class_name MachinePhysicsObject
 const MachineGameMode = GameMode.MachineGameMode
 var is_hovering: bool = false
 var is_grabbed: bool = false
+# This shouldn't be here, but should be taken from a Singleton
+# Still it's easier to just do it here
+var current_mode = MachineGameMode.EDIT
 
 func _on_body_entered(body: Node) -> void:
 	print("Rigid body ball entered")
@@ -17,6 +20,7 @@ func _on_body_entered(body: Node) -> void:
 	pass # Replace with function body.
 
 func on_mode_changed(mode: MachineGameMode) -> void:
+	current_mode = mode
 	if mode == MachineGameMode.EDIT:
 		if $"." is RigidBody2D:
 			print("This is a rigid body and the mode changed to play")
@@ -48,8 +52,9 @@ func on_mode_changed(mode: MachineGameMode) -> void:
 var grab_cursor = load("res://sprites/ui/grab.png")
 
 func _on_mouse_entered() -> void:
-	Input.set_custom_mouse_cursor(grab_cursor, 0, Vector2(12, 18))
-	is_hovering = true
+	if current_mode == MachineGameMode.EDIT:
+		Input.set_custom_mouse_cursor(grab_cursor, 0, Vector2(12, 18))
+		is_hovering = true
 
 
 func _on_mouse_exited() -> void:
@@ -59,7 +64,7 @@ func _on_mouse_exited() -> void:
 
 func _on_input_event(viewport: Node, event: InputEvent, shape_idx: int) -> void:
 	if event is InputEventMouseButton:
-		if event.button_index == 1 && event.pressed == true:
+		if event.button_index == 1 && event.pressed == true && is_hovering:
 			is_grabbed = true
 		# This also wouldn't work reliably
 		#elif event.button_index == 1 && event.pressed == false:
