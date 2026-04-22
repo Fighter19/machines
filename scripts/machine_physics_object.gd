@@ -9,13 +9,18 @@ var is_grabbed: bool = false
 var current_mode = MachineGameMode.EDIT
 
 var edit_position: Vector2
+var edit_rotation: float = 0.0
 var has_saved_edit_position: bool = false
 
 func _ready() -> void:
 	# Seed restore position from the current transform so freshly spawned
 	# objects do not jump when edit mode is applied.
 	var drag_target := _get_drag_target()
-	edit_position = drag_target.position
+	_save_edit_pose(drag_target)
+
+func _save_edit_pose(drag_target: Node2D) -> void:
+	edit_position = drag_target.global_position
+	edit_rotation = drag_target.global_rotation
 	has_saved_edit_position = true
 
 func _get_drag_target() -> Node2D:
@@ -42,7 +47,8 @@ func on_mode_changed(mode: MachineGameMode) -> void:
 	if mode == MachineGameMode.EDIT:
 		if has_saved_edit_position:
 			# Restore old position captured when switching into play mode.
-			drag_target.position = edit_position
+			drag_target.global_position = edit_position
+			drag_target.global_rotation = edit_rotation
 		if $"." is RigidBody2D:
 			print("This is a rigid body and the mode changed to play")
 			var self_rigid = $"." as RigidBody2D
@@ -53,8 +59,7 @@ func on_mode_changed(mode: MachineGameMode) -> void:
 	elif mode == MachineGameMode.PLAY:
 		# This assumes the previous mode was edit, so save it
 		# in order to restore it later
-		edit_position = drag_target.position
-		has_saved_edit_position = true
+		_save_edit_pose(drag_target)
 		if $"." is RigidBody2D:
 			print("This is a rigid body and the mode changed to edit")
 			var self_rigid = $"." as RigidBody2D
@@ -106,11 +111,17 @@ func _process(_delta: float) -> void:
 	if is_grabbed:
 		drag_target.global_position = get_global_mouse_position()
 
-	# Keep the latest edit pose so switching back from play restores correctly,
-	# especially for rigidbody-based machines like the marble.
-	if current_mode == MachineGameMode.EDIT:
-		edit_position = drag_target.position
-		has_saved_edit_position = true
+	if current_mode == MachineGameMode.EDIT and $"." is RigidBody2D and !is_grabbed and has_saved_edit_position:
+		# Keep rigidbodies glued to their saved edit pose while editing,
+		# so physics cannot slowly mutate edit_position.
+		drag_target.global_position = edit_position
+		drag_target.global_rotation = edit_rotation
+		var self_rigid = $"." as RigidBody2D
+		self_rigid.linear_velocity = Vector2.ZERO
+		self_rigid.angular_velocity = 0.0
 
 	if !Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+		if is_grabbed and current_mode == MachineGameMode.EDIT:
+			# Commit final user placement as the new edit pose.
+			_save_edit_pose(drag_target)
 		is_grabbed = false
