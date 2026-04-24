@@ -25,6 +25,8 @@ var menu_button_labels: Dictionary = {}
 var last_known_mode: int = -1
 
 func _ready() -> void:
+	add_to_group("machine_preview")
+
 	if inventory_data == null:
 		inventory_data = get_parent().find_child("MachineInventoryData", false, false) as MachineInventoryData
 
@@ -57,7 +59,7 @@ func _process(_delta: float) -> void:
 		var cursor := get_global_mouse_position()
 		global_position = cursor
 		if preview_instance != null:
-			_set_spawn_position(preview_instance, cursor)
+			_set_preview_position(preview_instance, cursor)
 
 func _input(event: InputEvent) -> void:
 	if !is_dragging_machine:
@@ -100,6 +102,62 @@ func _place_selected_machine() -> void:
 
 	_update_menu_contents()
 
+func try_return_item_to_inventory(item_node: Node, viewport_position: Vector2) -> bool:
+	if !_is_edit_mode():
+		return false
+
+	if inventory_data == null:
+		return false
+
+	if !_is_point_over_menu(viewport_position):
+		return false
+
+	var item_root := _get_instanced_scene_root(item_node)
+	var machine_type := _machine_type_from_node(item_root)
+	if machine_type == -1:
+		return false
+
+	inventory_data.add(machine_type as MachineInventoryData.MachineType, 1)
+	item_root.queue_free()
+	selected_type = _first_available_type(selected_type)
+	_update_menu_contents()
+	return true
+
+func _get_instanced_scene_root(node: Node) -> Node:
+	var current: Node = node
+	while current != null:
+		if current.scene_file_path != "":
+			return current
+		current = current.get_parent()
+	return node
+
+func _machine_type_from_node(node: Node) -> int:
+	if node == null:
+		return -1
+
+	if node is Mouse:
+		return MachineInventoryData.MachineType.MOUSE
+	if node is Eraser:
+		return MachineInventoryData.MachineType.ERASER
+
+	var path := String(node.scene_file_path).to_lower()
+	if path.ends_with("marble.tscn"):
+		return MachineInventoryData.MachineType.MARBLE
+	if path.ends_with("mouse.tscn"):
+		return MachineInventoryData.MachineType.MOUSE
+	if path.ends_with("eraser.tscn"):
+		return MachineInventoryData.MachineType.ERASER
+
+	var lower_name := String(node.name).to_lower()
+	if lower_name.contains("marble"):
+		return MachineInventoryData.MachineType.MARBLE
+	if lower_name.contains("mouse"):
+		return MachineInventoryData.MachineType.MOUSE
+	if lower_name.contains("eraser"):
+		return MachineInventoryData.MachineType.ERASER
+
+	return -1
+
 func _first_available_type(fallback: MachineInventoryData.MachineType) -> MachineInventoryData.MachineType:
 	if inventory_data == null:
 		return fallback
@@ -131,7 +189,7 @@ func _refresh_preview_instance() -> void:
 	add_child(preview_instance)
 	_disable_preview_collisions(preview_instance)
 	_set_preview_alpha(preview_instance)
-	_set_spawn_position(preview_instance, get_global_mouse_position())
+	_set_preview_position(preview_instance, get_global_mouse_position())
 
 func _instantiate_machine(machine_type: MachineInventoryData.MachineType) -> Node:
 	var scene := _scene_for_type(machine_type)
@@ -417,6 +475,27 @@ func _set_spawn_position(node: Node, target_position: Vector2) -> bool:
 			return true
 
 	return false
+
+func _set_preview_position(node: Node, target_position: Vector2) -> bool:
+	var visual_root := _find_visual_root(node)
+	if visual_root != null:
+		visual_root.global_position = target_position
+		return true
+
+	return _set_spawn_position(node, target_position)
+
+func _find_visual_root(node: Node) -> Node2D:
+	if node is Sprite2D:
+		var parent := node.get_parent()
+		if parent is Node2D:
+			return parent as Node2D
+
+	for child in node.get_children():
+		var found := _find_visual_root(child)
+		if found != null:
+			return found
+
+	return null
 
 func _get_machine_preview_texture(machine_type: MachineInventoryData.MachineType) -> Texture2D:
 	var preview_item := _instantiate_machine(machine_type)

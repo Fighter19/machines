@@ -122,6 +122,19 @@ func _process(_delta: float) -> void:
 
 	if !Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 		if is_grabbed and current_mode == MachineGameMode.EDIT:
-			# Commit final user placement as the new edit pose.
-			_save_edit_pose(drag_target)
+			var returned_to_inventory := _try_return_to_inventory(drag_target)
+			if !returned_to_inventory:
+				# Commit final user placement as the new edit pose.
+				_save_edit_pose(drag_target)
 		is_grabbed = false
+
+func _try_return_to_inventory(item_node: Node) -> bool:
+	var preview_controller := get_tree().get_first_node_in_group("machine_preview")
+	if preview_controller == null:
+		return false
+
+	if !(preview_controller is MachinePreview):
+		return false
+
+	var viewport_position := get_viewport().get_mouse_position()
+	return (preview_controller as MachinePreview).try_return_item_to_inventory(item_node, viewport_position)
