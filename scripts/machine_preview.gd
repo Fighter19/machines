@@ -6,6 +6,7 @@ class_name MachinePreview
 @export var marble_scene: PackedScene = preload("res://scenes/marble.tscn")
 @export var mouse_scene: PackedScene = preload("res://scenes/mouse.tscn")
 @export var eraser_scene: PackedScene = preload("res://scenes/eraser.tscn")
+@export var inventory_bar_texture: Texture2D = preload("res://sprites/ui/inventory.png")
 @export var preview_alpha: float = 0.55
 @export var menu_width: float = 170.0
 @export var game_mode_controller: GameMode
@@ -15,9 +16,10 @@ var preview_instance: Node
 var is_dragging_machine: bool = false
 
 var menu_layer: CanvasLayer
-var menu_panel: PanelContainer
+var menu_panel: Control
+var inventory_background: TextureRect
 var menu_title_label: Label
-var menu_content: VBoxContainer
+var menu_content: HBoxContainer
 var menu_buttons: Dictionary = {}
 var menu_button_labels: Dictionary = {}
 var last_known_mode: int = -1
@@ -36,7 +38,9 @@ func _ready() -> void:
 
 	selected_type = _first_available_type(selected_type)
 	_create_left_menu()
-	_attach_game_mode_controls_to_menu()
+	_position_game_mode_button()
+	_update_inventory_bar_layout()
+	get_viewport().size_changed.connect(_update_inventory_bar_layout)
 	_update_menu_contents()
 	_refresh_preview_instance()
 
@@ -168,21 +172,36 @@ func _create_left_menu() -> void:
 	menu_layer = CanvasLayer.new()
 	add_child(menu_layer)
 
-	menu_panel = PanelContainer.new()
-	menu_panel.set_anchors_preset(Control.PRESET_LEFT_WIDE)
-	menu_panel.offset_right = menu_width
-	menu_panel.offset_left = 0
-	menu_panel.offset_top = 0
-	menu_panel.offset_bottom = 0
+	menu_panel = Control.new()
+	menu_panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	menu_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	menu_layer.add_child(menu_panel)
 
-	menu_content = VBoxContainer.new()
-	menu_content.add_theme_constant_override("separation", 8)
+	inventory_background = TextureRect.new()
+	inventory_background.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+	inventory_background.offset_left = 0
+	inventory_background.offset_right = 0
+	inventory_background.offset_bottom = 0
+	inventory_background.offset_top = -160
+	inventory_background.texture = inventory_bar_texture
+	inventory_background.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	inventory_background.stretch_mode = TextureRect.STRETCH_SCALE
+	inventory_background.mouse_filter = Control.MOUSE_FILTER_STOP
+	menu_panel.add_child(inventory_background)
+
+	menu_content = HBoxContainer.new()
+	menu_content.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+	menu_content.offset_left = 20
+	menu_content.offset_right = -220
+	menu_content.offset_bottom = -18
+	menu_content.offset_top = -138
+	menu_content.alignment = BoxContainer.ALIGNMENT_CENTER
+	menu_content.add_theme_constant_override("separation", 10)
+	menu_content.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	menu_panel.add_child(menu_content)
 
 	menu_title_label = Label.new()
 	menu_title_label.text = "Inventory"
-	menu_content.add_child(menu_title_label)
 
 	for machine_type in [
 		MachineInventoryData.MachineType.MARBLE,
@@ -190,9 +209,13 @@ func _create_left_menu() -> void:
 		MachineInventoryData.MachineType.ERASER
 	]:
 		var button := Button.new()
-		button.custom_minimum_size = Vector2(0, 96)
-		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.custom_minimum_size = Vector2(118, 110)
+		button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 		button.button_down.connect(_on_machine_button_down.bind(machine_type))
+		button.add_theme_stylebox_override("normal", StyleBoxEmpty.new())
+		button.add_theme_stylebox_override("hover", StyleBoxEmpty.new())
+		button.add_theme_stylebox_override("pressed", StyleBoxEmpty.new())
+		button.add_theme_stylebox_override("disabled", StyleBoxEmpty.new())
 		menu_content.add_child(button)
 
 		var content := VBoxContainer.new()
@@ -203,11 +226,11 @@ func _create_left_menu() -> void:
 		content.offset_bottom = -6
 		content.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		content.alignment = BoxContainer.ALIGNMENT_CENTER
-		content.add_theme_constant_override("separation", 4)
+		content.add_theme_constant_override("separation", 6)
 		button.add_child(content)
 
 		var icon := TextureRect.new()
-		icon.custom_minimum_size = Vector2(40, 40)
+		icon.custom_minimum_size = Vector2(52, 52)
 		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		icon.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
 		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
@@ -222,12 +245,28 @@ func _create_left_menu() -> void:
 		menu_buttons[machine_type] = button
 		menu_button_labels[machine_type] = button_label
 
-	var hint_label := Label.new()
-	hint_label.text = "Hold left mouse on an item,\ndrag into the world, release to drop."
-	hint_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	menu_content.add_child(hint_label)
+func _update_inventory_bar_layout() -> void:
+	if inventory_background == null:
+		return
 
-func _attach_game_mode_controls_to_menu() -> void:
+	var texture := inventory_background.texture
+	if texture == null:
+		return
+
+	var tex_size := texture.get_size()
+	if tex_size.x <= 0:
+		return
+
+	var viewport_size := get_viewport().get_visible_rect().size
+	var bar_height := (viewport_size.x / tex_size.x) * tex_size.y
+
+	inventory_background.offset_top = -bar_height
+
+	if menu_content != null:
+		menu_content.offset_top = -bar_height + 10
+		menu_content.offset_bottom = -10
+
+func _position_game_mode_button() -> void:
 	if menu_content == null:
 		return
 
@@ -238,12 +277,19 @@ func _attach_game_mode_controls_to_menu() -> void:
 	if game_mode_button == null:
 		return
 
-	if game_mode_button.get_parent() != menu_content:
-		game_mode_button.reparent(menu_content)
-	menu_content.move_child(game_mode_button, 0)
+	if game_mode_button.get_parent() != menu_panel:
+		game_mode_button.reparent(menu_panel)
 
-	game_mode_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	game_mode_button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	game_mode_button.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+	game_mode_button.offset_right = -18
+	game_mode_button.offset_left = -218
+	game_mode_button.offset_bottom = -26
+	game_mode_button.offset_top = -82
+	game_mode_button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	game_mode_button.add_theme_stylebox_override("normal", StyleBoxEmpty.new())
+	game_mode_button.add_theme_stylebox_override("hover", StyleBoxEmpty.new())
+	game_mode_button.add_theme_stylebox_override("pressed", StyleBoxEmpty.new())
+	game_mode_button.add_theme_stylebox_override("disabled", StyleBoxEmpty.new())
 
 	var mode_label := game_mode_button.get_node_or_null("Label") as Label
 	if mode_label != null:
@@ -299,9 +345,18 @@ func _cancel_drag() -> void:
 	_update_menu_contents()
 
 func _is_point_over_menu(viewport_position: Vector2) -> bool:
-	if menu_panel == null:
+	if inventory_background == null:
 		return false
-	return menu_panel.get_global_rect().has_point(viewport_position)
+
+	if inventory_background.get_global_rect().has_point(viewport_position):
+		return true
+
+	if game_mode_controller != null:
+		var game_mode_button := game_mode_controller.get_node_or_null("Button") as Button
+		if game_mode_button != null and game_mode_button.get_global_rect().has_point(viewport_position):
+			return true
+
+	return false
 
 func _type_name(machine_type: MachineInventoryData.MachineType) -> String:
 	match machine_type:
