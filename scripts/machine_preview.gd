@@ -209,7 +209,7 @@ func _create_left_menu() -> void:
 		MachineInventoryData.MachineType.ERASER
 	]:
 		var button := Button.new()
-		button.custom_minimum_size = Vector2(118, 110)
+		button.custom_minimum_size = Vector2(112, 84)
 		button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 		button.button_down.connect(_on_machine_button_down.bind(machine_type))
 		button.add_theme_stylebox_override("normal", StyleBoxEmpty.new())
@@ -221,16 +221,16 @@ func _create_left_menu() -> void:
 		var content := VBoxContainer.new()
 		content.set_anchors_preset(Control.PRESET_FULL_RECT)
 		content.offset_left = 6
-		content.offset_top = 6
+		content.offset_top = 4
 		content.offset_right = -6
-		content.offset_bottom = -6
+		content.offset_bottom = -4
 		content.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		content.alignment = BoxContainer.ALIGNMENT_CENTER
-		content.add_theme_constant_override("separation", 6)
+		content.add_theme_constant_override("separation", 3)
 		button.add_child(content)
 
 		var icon := TextureRect.new()
-		icon.custom_minimum_size = Vector2(52, 52)
+		icon.custom_minimum_size = Vector2(40, 40)
 		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		icon.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
 		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
@@ -265,6 +265,21 @@ func _update_inventory_bar_layout() -> void:
 	if menu_content != null:
 		menu_content.offset_top = -bar_height + 10
 		menu_content.offset_bottom = -10
+
+	for button in menu_buttons.values():
+		var item_button := button as Button
+		if item_button == null:
+			continue
+
+		var button_height: float = clamp(bar_height - 26.0, 64.0, 90.0)
+		item_button.custom_minimum_size = Vector2(112, button_height)
+
+		var content := item_button.get_child(0) as VBoxContainer
+		if content != null and content.get_child_count() > 0:
+			var icon := content.get_child(0) as TextureRect
+			if icon != null:
+				var icon_side: float = clamp(button_height * 0.45, 30.0, 44.0)
+				icon.custom_minimum_size = Vector2(icon_side, icon_side)
 
 func _position_game_mode_button() -> void:
 	if menu_content == null:
