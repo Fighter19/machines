@@ -19,6 +19,7 @@ var menu_panel: PanelContainer
 var menu_title_label: Label
 var menu_content: VBoxContainer
 var menu_buttons: Dictionary = {}
+var menu_button_labels: Dictionary = {}
 var last_known_mode: int = -1
 
 func _ready() -> void:
@@ -188,24 +189,38 @@ func _create_left_menu() -> void:
 		MachineInventoryData.MachineType.MOUSE,
 		MachineInventoryData.MachineType.ERASER
 	]:
-		var row := HBoxContainer.new()
-		row.add_theme_constant_override("separation", 8)
-		menu_content.add_child(row)
+		var button := Button.new()
+		button.custom_minimum_size = Vector2(0, 96)
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.button_down.connect(_on_machine_button_down.bind(machine_type))
+		menu_content.add_child(button)
+
+		var content := VBoxContainer.new()
+		content.set_anchors_preset(Control.PRESET_FULL_RECT)
+		content.offset_left = 6
+		content.offset_top = 6
+		content.offset_right = -6
+		content.offset_bottom = -6
+		content.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		content.alignment = BoxContainer.ALIGNMENT_CENTER
+		content.add_theme_constant_override("separation", 4)
+		button.add_child(content)
 
 		var icon := TextureRect.new()
-		icon.custom_minimum_size = Vector2(64, 64)
+		icon.custom_minimum_size = Vector2(40, 40)
 		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		icon.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
 		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		icon.texture = _get_machine_preview_texture(machine_type)
-		row.add_child(icon)
+		content.add_child(icon)
 
-		var button := Button.new()
-		button.size_flags_vertical = Control.SIZE_EXPAND_FILL
-		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		button.button_down.connect(_on_machine_button_down.bind(machine_type))
-		row.add_child(button)
+		var button_label := Label.new()
+		button_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		button_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		content.add_child(button_label)
+
 		menu_buttons[machine_type] = button
+		menu_button_labels[machine_type] = button_label
 
 	var hint_label := Label.new()
 	hint_label.text = "Hold left mouse on an item,\ndrag into the world, release to drop."
@@ -247,11 +262,13 @@ func _update_menu_contents() -> void:
 
 	for machine_type in menu_buttons.keys():
 		var button: Button = menu_buttons[machine_type]
+		var button_label: Label = menu_button_labels[machine_type]
 		var amount := 0
 		if inventory_data != null:
 			amount = inventory_data.get_amount(machine_type)
 
-		button.text = "%s (%d)" % [_type_name(machine_type), amount]
+		if button_label != null:
+			button_label.text = "%s (%d)" % [_type_name(machine_type), amount]
 		button.disabled = !edit_mode or amount <= 0
 
 func _on_machine_button_down(machine_type: MachineInventoryData.MachineType) -> void:
