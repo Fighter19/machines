@@ -18,6 +18,7 @@ contact_monitor = true
 max_contacts_reported = 5
 linear_velocity = Vector2(15, 0)
 script = ExtResource("1_jmcsv")
+draggable = false
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="RigidBody2D" unique_id=11888273]
 shape = SubResource("CircleShape2D_0wfyh")

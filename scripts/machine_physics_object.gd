@@ -2,6 +2,7 @@ extends Node2D
 class_name MachinePhysicsObject
 
 const MachineGameMode = GameMode.MachineGameMode
+@export var draggable: bool = false
 var is_hovering: bool = false
 var is_grabbed: bool = false
 # This shouldn't be here, but should be taken from a Singleton
@@ -84,17 +85,24 @@ func on_mode_changed(mode: MachineGameMode) -> void:
 var grab_cursor = load("res://sprites/ui/grab.png")
 
 func _on_mouse_entered() -> void:
+	if !draggable:
+		return
 	if current_mode == MachineGameMode.EDIT:
 		Input.set_custom_mouse_cursor(grab_cursor, Input.CURSOR_ARROW, Vector2(12, 18))
 		is_hovering = true
 
 
 func _on_mouse_exited() -> void:
+	if !draggable:
+		return
 	Input.set_custom_mouse_cursor(null)
 	is_hovering = false
 
 
 func _on_input_event(_viewport: Node, event: InputEvent, _shape_idx: int) -> void:
+	if !draggable:
+		is_grabbed = false
+		return
 	if event is InputEventMouseButton:
 		if event.button_index == 1 && event.pressed == true && is_hovering:
 			is_grabbed = true
@@ -107,6 +115,12 @@ func _on_input_event(_viewport: Node, event: InputEvent, _shape_idx: int) -> voi
 
 
 func _process(_delta: float) -> void:
+	if !draggable:
+		if is_hovering:
+			Input.set_custom_mouse_cursor(null)
+		is_hovering = false
+		is_grabbed = false
+
 	var drag_target := _get_drag_target()
 	if is_grabbed:
 		drag_target.global_position = get_global_mouse_position()

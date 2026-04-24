@@ -32,6 +32,7 @@ func _ready() -> void:
 
 	if spawn_parent == null:
 		spawn_parent = get_parent()
+	_set_draggable_for_existing_machine_nodes(false)
 
 	if game_mode_controller == null:
 		game_mode_controller = get_parent().find_child("GameModeController", false, false) as GameMode
@@ -92,6 +93,7 @@ func _place_selected_machine() -> void:
 		_update_menu_contents()
 		return
 
+	_set_draggable_for_machine_nodes(machine, true)
 	_set_spawn_position(machine, get_global_mouse_position())
 
 	spawn_parent.add_child(machine)
@@ -101,6 +103,20 @@ func _place_selected_machine() -> void:
 		selected_type = _first_available_type(selected_type)
 
 	_update_menu_contents()
+
+func _set_draggable_for_machine_nodes(node: Node, enabled: bool) -> void:
+	if node is MachinePhysicsObject:
+		(node as MachinePhysicsObject).draggable = enabled
+
+	for child in node.get_children():
+		_set_draggable_for_machine_nodes(child, enabled)
+
+func _set_draggable_for_existing_machine_nodes(enabled: bool) -> void:
+	if spawn_parent == null:
+		return
+
+	for child in spawn_parent.get_children():
+		_set_draggable_for_machine_nodes(child, enabled)
 
 func try_return_item_to_inventory(item_node: Node, viewport_position: Vector2) -> bool:
 	if !_is_edit_mode():
