@@ -1,14 +1,18 @@
 [gd_scene format=3 uid="uid://i4ni7f5u85c4"]
 
+[ext_resource type="Script" path="res://scripts/marble.gd" id="1_marblectrl"]
 [ext_resource type="Script" uid="uid://bwxpwj8nrum" path="res://scripts/machine_physics_object.gd" id="1_jmcsv"]
 [ext_resource type="Texture2D" uid="uid://be5ylr76a3g8b" path="res://sprites/machines/marble_light_blue.png" id="2_q8mev"]
 [ext_resource type="Texture2D" uid="uid://q3cts48ahtja" path="res://sprites/machines/glare.png" id="3_rym2u"]
+[ext_resource type="AudioStream" path="res://audio/marble.ogg" id="4_marble_roll"]
+[ext_resource type="AudioStream" path="res://audio/marble_liftoff.ogg" id="5_marble_transition"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_o5qli"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_0wfyh"]
 
 [node name="Marble" type="Node" unique_id=963918236]
+script = ExtResource("1_marblectrl")
 
 [node name="RigidBody2D" type="RigidBody2D" parent="." unique_id=1368098340]
 position = Vector2(0, -62)
@@ -45,6 +49,12 @@ texture = ExtResource("2_q8mev")
 [node name="Sprite2D2" type="Sprite2D" parent="Node2D/Node2D" unique_id=1809714514]
 position = Vector2(8.451, -19.718)
 texture = ExtResource("3_rym2u")
+
+[node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="RigidBody2D" unique_id=122903501]
+stream = ExtResource("4_marble_roll")
+
+[node name="TransitionAudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="RigidBody2D" unique_id=507190143]
+stream = ExtResource("5_marble_transition")
 
 [connection signal="body_entered" from="RigidBody2D" to="RigidBody2D" method="_on_body_entered"]
 [connection signal="input_event" from="RigidBody2D" to="RigidBody2D" method="_on_input_event"]
