@@ -3,9 +3,9 @@
 [ext_resource type="PackedScene" uid="uid://d2xpr0pwj0312" path="res://scenes/mouse.tscn" id="2_0wfyh"]
 [ext_resource type="PackedScene" uid="uid://dbuawikin6djx" path="res://scenes/eraser.tscn" id="2_jyhfs"]
 [ext_resource type="PackedScene" uid="uid://i4ni7f5u85c4" path="res://scenes/marble.tscn" id="2_sugp2"]
-[ext_resource type="Script" path="res://scripts/machine_preview.gd" id="3_8v11n"]
+[ext_resource type="Script" uid="uid://fg5g28ij00xe" path="res://scripts/machine_preview.gd" id="3_8v11n"]
 [ext_resource type="Script" uid="uid://uoodueoyb0h7" path="res://scripts/game_mode.gd" id="4_jyhfs"]
-[ext_resource type="Script" path="res://scripts/machine_inventory_data.gd" id="5_8v11n"]
+[ext_resource type="Script" uid="uid://dlt2axi1vsvvp" path="res://scripts/machine_inventory_data.gd" id="5_8v11n"]
 [ext_resource type="Texture2D" uid="uid://b3pl5wwhfnvf3" path="res://sprites/karriertes_papier.png" id="5_tbgi4"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_tbgi4"]
@@ -14,12 +14,13 @@ font_color = Color(0, 0, 0, 1)
 [node name="Main" type="Node2D" unique_id=1990201257]
 
 [node name="TextureRect" type="TextureRect" parent="." unique_id=2089064171]
-offset_left = -576.0
-offset_top = -324.0
-offset_right = 1706.0762
-offset_bottom = 961.14844
+offset_left = -1139.1819
+offset_top = -619.0
+offset_right = 3544.7068
+offset_bottom = 1834.4653
 scale = Vector2(0.505, 0.505)
 texture = ExtResource("5_tbgi4")
+expand_mode = 2
 stretch_mode = 1
 
 [node name="Mouse" parent="." unique_id=1278409488 instance=ExtResource("2_0wfyh")]
@@ -31,13 +32,13 @@ position = Vector2(3, -34)
 
 [node name="Marble" parent="." unique_id=963918236 instance=ExtResource("2_sugp2")]
 
-[node name="MachineInventoryData" type="Node" parent="."]
+[node name="MachineInventoryData" type="Node" parent="." unique_id=191646385]
 script = ExtResource("5_8v11n")
 marble_count = 9
 mouse_count = 5
 eraser_count = 3
 
-[node name="MachinePreview" type="Node2D" parent="." node_paths=PackedStringArray("inventory_data", "spawn_parent")]
+[node name="MachinePreview" type="Node2D" parent="." unique_id=1160741803 node_paths=PackedStringArray("inventory_data", "spawn_parent")]
 script = ExtResource("3_8v11n")
 inventory_data = NodePath("../MachineInventoryData")
 spawn_parent = NodePath("..")

@@ -4,10 +4,8 @@
 [ext_resource type="Script" uid="uid://cooa5xa1hht27" path="res://scripts/pencil.gd" id="1_q0l7y"]
 [ext_resource type="Script" uid="uid://bwxpwj8nrum" path="res://scripts/machine_physics_object.gd" id="2_7r42t"]
 
-[sub_resource type="ConvexPolygonShape2D" id="ConvexPolygonShape2D_qtbbt"]
-points = PackedVector2Array(-105, 0, -90, -20, 52, -20, 108, 0, 52, 20, -90, 20)
-
 [node name="Pencil" type="Node2D" unique_id=97615624]
+position = Vector2(0.07, 0)
 scale = Vector2(0.75, 0.75)
 script = ExtResource("1_q0l7y")
 
@@ -18,8 +16,8 @@ texture = ExtResource("1_jjgk5")
 input_pickable = true
 script = ExtResource("2_7r42t")
 
-[node name="CollisionShape2D2" type="CollisionShape2D" parent="StaticBody2D" unique_id=291956573]
-shape = SubResource("ConvexPolygonShape2D_qtbbt")
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="StaticBody2D" unique_id=309437274]
+polygon = PackedVector2Array(-105, 0, -90, -20, 52, -20, 108, 0, 52, 20, -90, 20)
 
 [connection signal="input_event" from="StaticBody2D" to="StaticBody2D" method="_on_input_event"]
 [connection signal="mouse_entered" from="StaticBody2D" to="StaticBody2D" method="_on_mouse_entered"]
