@@ -1,14 +1,14 @@
 extends Node2D
 class_name Machine
 
-@onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
+@onready var sprite: AnimatedSprite2D = get_node_or_null("AnimatedSprite2D") as AnimatedSprite2D
 @export var activate_startup_time: float = 2
 
 var startup_timer: Timer
 	
 func machine_on_activate() -> void:
 	print("Activate over")
-	if sprite.sprite_frames.has_animation("active"):
+	if sprite != null and sprite.sprite_frames != null and sprite.sprite_frames.has_animation("active"):
 		sprite.animation = "active"
 
 func machine_start_activate() -> void:
@@ -31,4 +31,5 @@ func machine_on_mode_changed(_mode: GameMode.MachineGameMode):
 	pass
 
 func _ready() -> void:
-	print(sprite.animation)
+	if sprite != null:
+		print(sprite.animation)

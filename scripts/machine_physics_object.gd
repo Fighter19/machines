@@ -4,6 +4,7 @@ class_name MachinePhysicsObject
 const MachineGameMode = GameMode.MachineGameMode
 @export var draggable: bool = false
 @export var drag_start_threshold: float = 12.0
+@export var pinned_in_play: bool = false
 var is_hovering: bool = false
 var is_grabbed: bool = false
 var is_press_candidate: bool = false
@@ -67,7 +68,20 @@ func on_mode_changed(mode: MachineGameMode) -> void:
 		if $"." is RigidBody2D:
 			print("This is a rigid body and the mode changed to edit")
 			var self_rigid = $"." as RigidBody2D
-			self_rigid.freeze = false
+			self_rigid.freeze = pinned_in_play
+			if pinned_in_play:
+				self_rigid.freeze_mode = RigidBody2D.FREEZE_MODE_STATIC
+				self_rigid.linear_velocity = Vector2.ZERO
+				self_rigid.angular_velocity = 0.0
+
+func is_rigidbody_machine() -> bool:
+	return $"." is RigidBody2D
+
+func set_pinned_in_play(value: bool) -> void:
+	pinned_in_play = value
+
+func is_pinned_in_play() -> bool:
+	return pinned_in_play
 
 # This is needlessly complicated, godot has _on_mouse*
 #func _input(event: InputEvent) -> void:

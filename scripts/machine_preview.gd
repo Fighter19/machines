@@ -6,8 +6,10 @@ class_name MachinePreview
 @export var marble_scene: PackedScene = preload("res://scenes/marble.tscn")
 @export var mouse_scene: PackedScene = preload("res://scenes/mouse.tscn")
 @export var eraser_scene: PackedScene = preload("res://scenes/eraser.tscn")
+@export var pencil_scene: PackedScene
 @export var inventory_bar_texture: Texture2D = preload("res://sprites/ui/inventory.png")
 @export var rotate_button_texture: Texture2D = preload("res://sprites/ui/rotate.png")
+@export var pin_button_texture: Texture2D
 @export var preview_alpha: float = 0.55
 @export var menu_width: float = 170.0
 @export var game_mode_controller: GameMode
@@ -24,7 +26,9 @@ var menu_content: HBoxContainer
 var menu_buttons: Dictionary = {}
 var menu_button_labels: Dictionary = {}
 var last_known_mode: int = -1
-var item_action_button: Button
+var item_action_menu: HBoxContainer
+var rotate_action_button: Button
+var pin_action_button: Button
 var selected_machine_object: MachinePhysicsObject
 var selected_drag_target: Node2D
 
@@ -37,6 +41,11 @@ func _ready() -> void:
 	if spawn_parent == null:
 		spawn_parent = get_parent()
 	_set_draggable_for_existing_machine_nodes(false)
+
+	if pencil_scene == null:
+		pencil_scene = load("res://scenes/pencil.tscn") as PackedScene
+	if pin_button_texture == null:
+		pin_button_texture = load("res://sprites/ui/pin.png") as Texture2D
 
 	if game_mode_controller == null:
 		game_mode_controller = get_parent().find_child("GameModeController", false, false) as GameMode
@@ -165,42 +174,69 @@ func clear_selected_machine_item(expected_item: MachinePhysicsObject = null) -> 
 	_hide_item_action_menu()
 
 func _create_item_action_menu() -> void:
-	item_action_button = Button.new()
-	item_action_button.visible = false
-	item_action_button.custom_minimum_size = Vector2(44, 44)
-	item_action_button.icon = rotate_button_texture
-	item_action_button.expand_icon = true
-	item_action_button.tooltip_text = "Rotate 45 deg CW"
-	item_action_button.focus_mode = Control.FOCUS_NONE
-	item_action_button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-	item_action_button.add_theme_stylebox_override("normal", StyleBoxEmpty.new())
-	item_action_button.add_theme_stylebox_override("hover", StyleBoxEmpty.new())
-	item_action_button.add_theme_stylebox_override("pressed", StyleBoxEmpty.new())
-	item_action_button.pressed.connect(_on_rotate_selected_pressed)
-	menu_panel.add_child(item_action_button)
+	item_action_menu = HBoxContainer.new()
+	item_action_menu.visible = false
+	item_action_menu.alignment = BoxContainer.ALIGNMENT_CENTER
+	item_action_menu.mouse_filter = Control.MOUSE_FILTER_PASS
+	item_action_menu.add_theme_constant_override("separation", 4)
+	menu_panel.add_child(item_action_menu)
+
+	rotate_action_button = Button.new()
+	rotate_action_button.custom_minimum_size = Vector2(44, 44)
+	rotate_action_button.icon = rotate_button_texture
+	rotate_action_button.expand_icon = true
+	rotate_action_button.tooltip_text = "Rotate 45 deg CW"
+	rotate_action_button.focus_mode = Control.FOCUS_NONE
+	rotate_action_button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	rotate_action_button.add_theme_stylebox_override("normal", StyleBoxEmpty.new())
+	rotate_action_button.add_theme_stylebox_override("hover", StyleBoxEmpty.new())
+	rotate_action_button.add_theme_stylebox_override("pressed", StyleBoxEmpty.new())
+	rotate_action_button.pressed.connect(_on_rotate_selected_pressed)
+	item_action_menu.add_child(rotate_action_button)
+
+	pin_action_button = Button.new()
+	pin_action_button.custom_minimum_size = Vector2(44, 44)
+	if pin_button_texture != null:
+		pin_action_button.icon = pin_button_texture
+		pin_action_button.expand_icon = true
+	else:
+		pin_action_button.text = "Pin"
+		pin_action_button.custom_minimum_size = Vector2(52, 44)
+	pin_action_button.toggle_mode = true
+	pin_action_button.tooltip_text = "Keep rigidbody frozen during play mode"
+	pin_action_button.focus_mode = Control.FOCUS_NONE
+	pin_action_button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	pin_action_button.add_theme_stylebox_override("normal", StyleBoxEmpty.new())
+	pin_action_button.add_theme_stylebox_override("hover", StyleBoxEmpty.new())
+	pin_action_button.add_theme_stylebox_override("pressed", StyleBoxEmpty.new())
+	pin_action_button.add_theme_stylebox_override("disabled", StyleBoxEmpty.new())
+	pin_action_button.toggled.connect(_on_pin_selected_toggled)
+	item_action_menu.add_child(pin_action_button)
 
 func _show_item_action_menu(viewport_position: Vector2) -> void:
-	if item_action_button == null:
+	if item_action_menu == null:
 		return
 
-	var button_size := item_action_button.get_combined_minimum_size()
+	_sync_item_action_menu_state()
+
+	var button_size := item_action_menu.get_combined_minimum_size()
 	var viewport_size := get_viewport().get_visible_rect().size
 	var target := viewport_position + Vector2(16, -52)
 	target.x = clamp(target.x, 8.0, viewport_size.x - button_size.x - 8.0)
 	target.y = clamp(target.y, 8.0, viewport_size.y - button_size.y - 8.0)
 
-	item_action_button.position = target
-	item_action_button.visible = true
+	item_action_menu.position = target
+	item_action_menu.visible = true
 
 func _hide_item_action_menu() -> void:
-	if item_action_button != null:
-		item_action_button.visible = false
+	if item_action_menu != null:
+		item_action_menu.visible = false
 
 func _is_point_over_item_action_menu(viewport_position: Vector2) -> bool:
-	if item_action_button == null or !item_action_button.visible:
+	if item_action_menu == null or !item_action_menu.visible:
 		return false
 
-	return item_action_button.get_global_rect().has_point(viewport_position)
+	return item_action_menu.get_global_rect().has_point(viewport_position)
 
 func _is_over_machine_item(viewport_position: Vector2) -> bool:
 	if spawn_parent == null:
@@ -229,6 +265,38 @@ func _on_rotate_selected_pressed() -> void:
 		return
 
 	selected_machine_object.rotate_clockwise(45.0)
+
+func _on_pin_selected_toggled(toggled_on: bool) -> void:
+	if selected_machine_object == null or !is_instance_valid(selected_machine_object):
+		clear_selected_machine_item()
+		return
+
+	if !selected_machine_object.is_rigidbody_machine():
+		_sync_item_action_menu_state()
+		return
+
+	selected_machine_object.set_pinned_in_play(toggled_on)
+	_sync_item_action_menu_state()
+
+func _sync_item_action_menu_state() -> void:
+	if pin_action_button == null:
+		return
+
+	var has_valid_selection := selected_machine_object != null and is_instance_valid(selected_machine_object)
+	if !has_valid_selection:
+		pin_action_button.set_pressed_no_signal(false)
+		pin_action_button.disabled = true
+		pin_action_button.tooltip_text = "Select an item"
+		return
+
+	var can_pin := selected_machine_object.is_rigidbody_machine()
+	pin_action_button.disabled = !can_pin
+	if can_pin:
+		pin_action_button.tooltip_text = "Keep rigidbody frozen during play mode"
+		pin_action_button.set_pressed_no_signal(selected_machine_object.is_pinned_in_play())
+	else:
+		pin_action_button.tooltip_text = "Pin only applies to rigidbody items"
+		pin_action_button.set_pressed_no_signal(false)
 
 func try_return_item_to_inventory(item_node: Node, viewport_position: Vector2) -> bool:
 	if !_is_edit_mode():
@@ -277,6 +345,8 @@ func _machine_type_from_node(node: Node) -> int:
 		return MachineInventoryData.MachineType.MOUSE
 	if path.ends_with("eraser.tscn"):
 		return MachineInventoryData.MachineType.ERASER
+	if path.ends_with("pencil.tscn"):
+		return MachineInventoryData.MachineType.PENCIL
 
 	var lower_name := String(node.name).to_lower()
 	if lower_name.contains("marble"):
@@ -285,6 +355,8 @@ func _machine_type_from_node(node: Node) -> int:
 		return MachineInventoryData.MachineType.MOUSE
 	if lower_name.contains("eraser"):
 		return MachineInventoryData.MachineType.ERASER
+	if lower_name.contains("pencil"):
+		return MachineInventoryData.MachineType.PENCIL
 
 	return -1
 
@@ -335,6 +407,8 @@ func _scene_for_type(machine_type: MachineInventoryData.MachineType) -> PackedSc
 			return mouse_scene
 		MachineInventoryData.MachineType.ERASER:
 			return eraser_scene
+		MachineInventoryData.MachineType.PENCIL:
+			return pencil_scene
 	return null
 
 func _disable_preview_collisions(node: Node) -> void:
@@ -394,7 +468,8 @@ func _create_left_menu() -> void:
 	for machine_type in [
 		MachineInventoryData.MachineType.MARBLE,
 		MachineInventoryData.MachineType.MOUSE,
-		MachineInventoryData.MachineType.ERASER
+		MachineInventoryData.MachineType.ERASER,
+		MachineInventoryData.MachineType.PENCIL
 	]:
 		var button := Button.new()
 		button.custom_minimum_size = Vector2(112, 84)
@@ -571,6 +646,8 @@ func _type_name(machine_type: MachineInventoryData.MachineType) -> String:
 			return "Mouse"
 		MachineInventoryData.MachineType.ERASER:
 			return "Eraser"
+		MachineInventoryData.MachineType.PENCIL:
+			return "Pencil"
 	return "Unknown"
 
 func _is_edit_mode() -> bool:
