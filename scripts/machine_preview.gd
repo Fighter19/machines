@@ -6,7 +6,7 @@ class_name MachinePreview
 @export var marble_scene: PackedScene = preload("res://scenes/marble.tscn")
 @export var mouse_scene: PackedScene = preload("res://scenes/mouse.tscn")
 @export var eraser_scene: PackedScene = preload("res://scenes/eraser.tscn")
-@export var pencil_scene: PackedScene
+@export var pencil_scene: PackedScene = preload("res://scenes/pencil.tscn")
 @export var inventory_bar_texture: Texture2D = preload("res://sprites/ui/inventory.png")
 @export var rotate_button_texture: Texture2D = preload("res://sprites/ui/rotate.png")
 @export var pin_button_texture: Texture2D
@@ -42,8 +42,6 @@ func _ready() -> void:
 		spawn_parent = get_parent()
 	_set_draggable_for_existing_machine_nodes(false)
 
-	if pencil_scene == null:
-		pencil_scene = load("res://scenes/pencil.tscn") as PackedScene
 	if pin_button_texture == null:
 		pin_button_texture = load("res://sprites/ui/pin.png") as Texture2D
 
