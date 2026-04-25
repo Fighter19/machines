@@ -3,8 +3,11 @@ class_name MachinePhysicsObject
 
 const MachineGameMode = GameMode.MachineGameMode
 @export var draggable: bool = false
+@export var drag_start_threshold: float = 12.0
 var is_hovering: bool = false
 var is_grabbed: bool = false
+var is_press_candidate: bool = false
+var press_start_viewport_position: Vector2 = Vector2.ZERO
 # This shouldn't be here, but should be taken from a Singleton
 # Still it's easier to just do it here
 var current_mode = MachineGameMode.EDIT
@@ -101,11 +104,21 @@ func _on_mouse_exited() -> void:
 
 func _on_input_event(_viewport: Node, event: InputEvent, _shape_idx: int) -> void:
 	if !draggable:
+		if is_hovering:
+			Input.set_custom_mouse_cursor(null)
+		is_hovering = false
 		is_grabbed = false
+		is_press_candidate = false
 		return
 	if event is InputEventMouseButton:
-		if event.button_index == 1 && event.pressed == true && is_hovering:
-			is_grabbed = true
+		var mouse_event := event as InputEventMouseButton
+		if mouse_event.button_index == MOUSE_BUTTON_LEFT and mouse_event.pressed and is_hovering and current_mode == MachineGameMode.EDIT:
+			is_press_candidate = true
+			is_grabbed = false
+			press_start_viewport_position = mouse_event.position
+			var preview_controller := _get_preview_controller()
+			if preview_controller != null:
+				preview_controller.select_machine_item_silent(self, _get_drag_target())
 		# This also wouldn't work reliably
 		#elif event.button_index == 1 && event.pressed == false:
 			#is_grabbed = false
@@ -120,8 +133,18 @@ func _process(_delta: float) -> void:
 			Input.set_custom_mouse_cursor(null)
 		is_hovering = false
 		is_grabbed = false
+		is_press_candidate = false
 
 	var drag_target := _get_drag_target()
+	if is_press_candidate and !is_grabbed and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+		var cursor_viewport_position := get_viewport().get_mouse_position()
+		if cursor_viewport_position.distance_to(press_start_viewport_position) >= drag_start_threshold:
+			is_grabbed = true
+			is_press_candidate = false
+			var preview_controller := _get_preview_controller()
+			if preview_controller != null:
+				preview_controller.clear_selected_machine_item(self)
+
 	if is_grabbed:
 		drag_target.global_position = get_global_mouse_position()
 
@@ -140,15 +163,37 @@ func _process(_delta: float) -> void:
 			if !returned_to_inventory:
 				# Commit final user placement as the new edit pose.
 				_save_edit_pose(drag_target)
+		elif is_press_candidate and current_mode == MachineGameMode.EDIT:
+			var preview_controller := _get_preview_controller()
+			if preview_controller != null:
+				preview_controller.select_machine_item(self, drag_target, get_viewport().get_mouse_position())
+		is_press_candidate = false
 		is_grabbed = false
 
-func _try_return_to_inventory(item_node: Node) -> bool:
+func rotate_clockwise(degrees: float) -> void:
+	var drag_target := _get_drag_target()
+	drag_target.global_rotation += deg_to_rad(degrees)
+	_save_edit_pose(drag_target)
+
+	if $"." is RigidBody2D:
+		var self_rigid = $"." as RigidBody2D
+		self_rigid.linear_velocity = Vector2.ZERO
+		self_rigid.angular_velocity = 0.0
+
+func _get_preview_controller() -> MachinePreview:
 	var preview_controller := get_tree().get_first_node_in_group("machine_preview")
+	if preview_controller == null:
+		return null
+
+	if !(preview_controller is MachinePreview):
+		return null
+
+	return preview_controller as MachinePreview
+
+func _try_return_to_inventory(item_node: Node) -> bool:
+	var preview_controller := _get_preview_controller()
 	if preview_controller == null:
 		return false
 
-	if !(preview_controller is MachinePreview):
-		return false
-
 	var viewport_position := get_viewport().get_mouse_position()
-	return (preview_controller as MachinePreview).try_return_item_to_inventory(item_node, viewport_position)
+	return preview_controller.try_return_item_to_inventory(item_node, viewport_position)

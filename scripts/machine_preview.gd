@@ -7,6 +7,7 @@ class_name MachinePreview
 @export var mouse_scene: PackedScene = preload("res://scenes/mouse.tscn")
 @export var eraser_scene: PackedScene = preload("res://scenes/eraser.tscn")
 @export var inventory_bar_texture: Texture2D = preload("res://sprites/ui/inventory.png")
+@export var rotate_button_texture: Texture2D = preload("res://sprites/ui/rotate.png")
 @export var preview_alpha: float = 0.55
 @export var menu_width: float = 170.0
 @export var game_mode_controller: GameMode
@@ -23,6 +24,9 @@ var menu_content: HBoxContainer
 var menu_buttons: Dictionary = {}
 var menu_button_labels: Dictionary = {}
 var last_known_mode: int = -1
+var item_action_button: Button
+var selected_machine_object: MachinePhysicsObject
+var selected_drag_target: Node2D
 
 func _ready() -> void:
 	add_to_group("machine_preview")
@@ -41,6 +45,7 @@ func _ready() -> void:
 
 	selected_type = _first_available_type(selected_type)
 	_create_left_menu()
+	_create_item_action_menu()
 	_position_game_mode_button()
 	_update_inventory_bar_layout()
 	get_viewport().size_changed.connect(_update_inventory_bar_layout)
@@ -51,6 +56,14 @@ func _process(_delta: float) -> void:
 	if game_mode_controller != null and game_mode_controller.current_mode != last_known_mode:
 		last_known_mode = game_mode_controller.current_mode
 		_update_menu_contents()
+		if !_is_edit_mode():
+			clear_selected_machine_item()
+
+	if selected_machine_object != null and !is_instance_valid(selected_machine_object):
+		clear_selected_machine_item()
+
+	if selected_drag_target != null and !is_instance_valid(selected_drag_target):
+		clear_selected_machine_item()
 
 	if is_dragging_machine and !_is_edit_mode():
 		_cancel_drag()
@@ -64,6 +77,12 @@ func _process(_delta: float) -> void:
 
 func _input(event: InputEvent) -> void:
 	if !is_dragging_machine:
+		if event is InputEventMouseButton:
+			var mouse_event := event as InputEventMouseButton
+			if mouse_event.button_index == MOUSE_BUTTON_LEFT and mouse_event.pressed:
+				if _is_point_over_item_action_menu(mouse_event.position):
+					return
+				clear_selected_machine_item()
 		return
 
 	if event is InputEventMouseButton:
@@ -118,6 +137,99 @@ func _set_draggable_for_existing_machine_nodes(enabled: bool) -> void:
 	for child in spawn_parent.get_children():
 		_set_draggable_for_machine_nodes(child, enabled)
 
+func select_machine_item(item: MachinePhysicsObject, drag_target: Node2D, viewport_position: Vector2) -> void:
+	if !_is_edit_mode():
+		return
+
+	selected_machine_object = item
+	selected_drag_target = drag_target
+	_show_item_action_menu(viewport_position)
+
+func select_machine_item_silent(item: MachinePhysicsObject, drag_target: Node2D) -> void:
+	if !_is_edit_mode():
+		return
+
+	selected_machine_object = item
+	selected_drag_target = drag_target
+	_hide_item_action_menu()
+
+func is_machine_item_selected(item: MachinePhysicsObject) -> bool:
+	return selected_machine_object == item
+
+func clear_selected_machine_item(expected_item: MachinePhysicsObject = null) -> void:
+	if expected_item != null and selected_machine_object != expected_item:
+		return
+
+	selected_machine_object = null
+	selected_drag_target = null
+	_hide_item_action_menu()
+
+func _create_item_action_menu() -> void:
+	item_action_button = Button.new()
+	item_action_button.visible = false
+	item_action_button.custom_minimum_size = Vector2(44, 44)
+	item_action_button.icon = rotate_button_texture
+	item_action_button.expand_icon = true
+	item_action_button.tooltip_text = "Rotate 45 deg CW"
+	item_action_button.focus_mode = Control.FOCUS_NONE
+	item_action_button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	item_action_button.add_theme_stylebox_override("normal", StyleBoxEmpty.new())
+	item_action_button.add_theme_stylebox_override("hover", StyleBoxEmpty.new())
+	item_action_button.add_theme_stylebox_override("pressed", StyleBoxEmpty.new())
+	item_action_button.pressed.connect(_on_rotate_selected_pressed)
+	menu_panel.add_child(item_action_button)
+
+func _show_item_action_menu(viewport_position: Vector2) -> void:
+	if item_action_button == null:
+		return
+
+	var button_size := item_action_button.get_combined_minimum_size()
+	var viewport_size := get_viewport().get_visible_rect().size
+	var target := viewport_position + Vector2(16, -52)
+	target.x = clamp(target.x, 8.0, viewport_size.x - button_size.x - 8.0)
+	target.y = clamp(target.y, 8.0, viewport_size.y - button_size.y - 8.0)
+
+	item_action_button.position = target
+	item_action_button.visible = true
+
+func _hide_item_action_menu() -> void:
+	if item_action_button != null:
+		item_action_button.visible = false
+
+func _is_point_over_item_action_menu(viewport_position: Vector2) -> bool:
+	if item_action_button == null or !item_action_button.visible:
+		return false
+
+	return item_action_button.get_global_rect().has_point(viewport_position)
+
+func _is_over_machine_item(viewport_position: Vector2) -> bool:
+	if spawn_parent == null:
+		return false
+
+	var query := PhysicsPointQueryParameters2D.new()
+	query.position = _viewport_to_world(viewport_position)
+	query.collide_with_areas = true
+	query.collide_with_bodies = true
+
+	var result := get_world_2d().direct_space_state.intersect_point(query, 8)
+	for hit in result:
+		var hit_dict: Dictionary = hit
+		var collider: Object = hit_dict.get("collider") as Object
+		if collider is MachinePhysicsObject:
+			return true
+
+	return false
+
+func _viewport_to_world(viewport_position: Vector2) -> Vector2:
+	return get_viewport().get_canvas_transform().affine_inverse() * viewport_position
+
+func _on_rotate_selected_pressed() -> void:
+	if selected_machine_object == null or !is_instance_valid(selected_machine_object):
+		clear_selected_machine_item()
+		return
+
+	selected_machine_object.rotate_clockwise(45.0)
+
 func try_return_item_to_inventory(item_node: Node, viewport_position: Vector2) -> bool:
 	if !_is_edit_mode():
 		return false
@@ -129,6 +241,8 @@ func try_return_item_to_inventory(item_node: Node, viewport_position: Vector2) -
 		return false
 
 	var item_root := _get_instanced_scene_root(item_node)
+	if selected_machine_object != null and is_instance_valid(selected_machine_object) and item_root.is_ancestor_of(selected_machine_object):
+		clear_selected_machine_item()
 	var machine_type := _machine_type_from_node(item_root)
 	if machine_type == -1:
 		return false
@@ -409,6 +523,8 @@ func _update_menu_contents() -> void:
 func _on_machine_button_down(machine_type: MachineInventoryData.MachineType) -> void:
 	if !_is_edit_mode():
 		return
+
+	clear_selected_machine_item()
 
 	_select_type(machine_type)
 	if inventory_data != null and !inventory_data.has(machine_type):
