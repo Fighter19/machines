@@ -8,6 +8,7 @@
 [ext_resource type="Script" uid="uid://dlt2axi1vsvvp" path="res://scripts/machine_inventory_data.gd" id="5_8v11n"]
 [ext_resource type="Texture2D" uid="uid://b3pl5wwhfnvf3" path="res://sprites/karriertes_papier.png" id="5_tbgi4"]
 [ext_resource type="PackedScene" uid="uid://2wftcuqetkpt" path="res://scenes/chair.tscn" id="8_tipki"]
+[ext_resource type="PackedScene" path="res://scenes/goal_area.tscn" id="9_tqsce"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_tbgi4"]
 font_color = Color(0, 0, 0, 1)
@@ -66,7 +67,13 @@ offset_bottom = 35.0
 text = "Mode: Play"
 label_settings = SubResource("LabelSettings_tbgi4")
 
-[node name="Pencil" parent="." unique_id=97615624 instance=ExtResource("8_tipki")]
+[node name="Chair" parent="." unique_id=97615624 instance=ExtResource("8_tipki")]
 position = Vector2(430, 75)
+
+[node name="ChairGoal" parent="." instance=ExtResource("9_tqsce")]
+position = Vector2(468, 162)
+target_object_path = NodePath("../Marble")
+objective_description = "Get the marble onto the chair."
+completion_text = "The marble reached the chair."
 
 [connection signal="toggled" from="GameModeController/Button" to="GameModeController" method="_on_button_toggled"]
