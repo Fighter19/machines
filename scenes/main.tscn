@@ -9,6 +9,7 @@
 [ext_resource type="PackedScene" uid="uid://2wftcuqetkpt" path="res://scenes/chair.tscn" id="8_tipki"]
 [ext_resource type="Script" uid="uid://dabrphmret3pt" path="res://scripts/goal_area.gd" id="9_tqsce"]
 [ext_resource type="PackedScene" path="res://scenes/level_2.tscn" id="10_lvl2"]
+[ext_resource type="Script" path="res://scripts/main_level_flash.gd" id="11_flash"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_tbgi4"]
 font_color = Color(0, 0, 0, 1)
@@ -86,6 +87,18 @@ color = Color(0.2, 0.85, 0.2, 0.28)
 [node name="CollisionShape2D" type="CollisionShape2D" parent="ChairGoal/Area2D" unique_id=840834432]
 position = Vector2(-27.5, -38)
 shape = SubResource("RectangleShape2D_goal1")
+
+[node name="MainLevelFlash" type="CanvasLayer" parent="." unique_id=1581153247]
+script = ExtResource("11_flash")
+
+[node name="ColorRect" type="ColorRect" parent="MainLevelFlash" unique_id=1588432439]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(1, 1, 1, 1)
 
 [connection signal="toggled" from="GameModeController/Button" to="GameModeController" method="_on_button_toggled"]
 [connection signal="body_entered" from="ChairGoal/Area2D" to="ChairGoal" method="_on_area_2d_body_entered"]
