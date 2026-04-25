@@ -1,0 +1,24 @@
+[gd_scene format=3 uid="uid://2wftcuqetkpt"]
+
+[ext_resource type="Script" uid="uid://cooa5xa1hht27" path="res://scripts/machine_static_object.gd" id="1_hxd06"]
+[ext_resource type="Texture2D" uid="uid://dt5ffh388i4l7" path="res://sprites/machines/chair.png" id="2_hxd06"]
+[ext_resource type="Script" uid="uid://bwxpwj8nrum" path="res://scripts/machine_physics_object.gd" id="3_frog0"]
+
+[node name="Pencil" type="Node2D" unique_id=97615624]
+scale = Vector2(0.75, 0.75)
+script = ExtResource("1_hxd06")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=890956088]
+texture = ExtResource("2_hxd06")
+
+[node name="StaticBody2D" type="StaticBody2D" parent="." unique_id=906015766]
+input_pickable = true
+script = ExtResource("3_frog0")
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="StaticBody2D" unique_id=309437274]
+position = Vector2(-34.666668, 53.333336)
+polygon = PackedVector2Array(-58.666668, 189.33334, -85.33333, 193.33334, -102.66667, 16, 157.33334, 16, 206.66667, 42.66667, 204.00002, 264, 174.66667, 258.66666, 153.33334, 110.666664, 13.333334, 106.666664, 13.333334, 262.66666, -12, 260, -25.333332, 90.666664, -56.000004, 60)
+
+[connection signal="input_event" from="StaticBody2D" to="StaticBody2D" method="_on_input_event"]
+[connection signal="mouse_entered" from="StaticBody2D" to="StaticBody2D" method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="StaticBody2D" to="StaticBody2D" method="_on_mouse_exited"]

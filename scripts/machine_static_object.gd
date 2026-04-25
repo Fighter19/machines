@@ -1,5 +1,5 @@
 extends Machine
-class_name Pencil
+class_name MachineStaticObject
 
 @onready var physics_object: MachinePhysicsObject = $StaticBody2D
 

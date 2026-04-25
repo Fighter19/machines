@@ -1,11 +1,10 @@
 [gd_scene format=3 uid="uid://bsv1mxvd8iboi"]
 
 [ext_resource type="Texture2D" uid="uid://ckeeo5jkqyach" path="res://sprites/machines/pencil.png" id="1_jjgk5"]
-[ext_resource type="Script" uid="uid://cooa5xa1hht27" path="res://scripts/pencil.gd" id="1_q0l7y"]
+[ext_resource type="Script" uid="uid://cooa5xa1hht27" path="res://scripts/machine_static_object.gd" id="1_q0l7y"]
 [ext_resource type="Script" uid="uid://bwxpwj8nrum" path="res://scripts/machine_physics_object.gd" id="2_7r42t"]
 
 [node name="Pencil" type="Node2D" unique_id=97615624]
-position = Vector2(0.07, 0)
 scale = Vector2(0.75, 0.75)
 script = ExtResource("1_q0l7y")
 
