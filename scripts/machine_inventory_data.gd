@@ -3,13 +3,13 @@ class_name MachineInventoryData
 
 enum MachineType {
 	MARBLE,
-	MOUSE,
+	BATTERY,
 	ERASER,
 	PENCIL
 }
 
 @export var marble_count: int = 7
-@export var mouse_count: int = 4
+@export var battery_count: int = 4
 @export var eraser_count: int = 2
 @export var pencil_count: int = 3
 
@@ -17,8 +17,8 @@ func get_amount(machine_type: MachineType) -> int:
 	match machine_type:
 		MachineType.MARBLE:
 			return marble_count
-		MachineType.MOUSE:
-			return mouse_count
+		MachineType.BATTERY:
+			return battery_count
 		MachineType.ERASER:
 			return eraser_count
 		MachineType.PENCIL:
@@ -35,8 +35,8 @@ func consume(machine_type: MachineType) -> bool:
 	match machine_type:
 		MachineType.MARBLE:
 			marble_count -= 1
-		MachineType.MOUSE:
-			mouse_count -= 1
+		MachineType.BATTERY:
+			battery_count -= 1
 		MachineType.ERASER:
 			eraser_count -= 1
 		MachineType.PENCIL:
@@ -51,8 +51,8 @@ func add(machine_type: MachineType, amount: int = 1) -> void:
 	match machine_type:
 		MachineType.MARBLE:
 			marble_count += amount
-		MachineType.MOUSE:
-			mouse_count += amount
+		MachineType.BATTERY:
+			battery_count += amount
 		MachineType.ERASER:
 			eraser_count += amount
 		MachineType.PENCIL:
@@ -60,7 +60,7 @@ func add(machine_type: MachineType, amount: int = 1) -> void:
 
 func get_available_types() -> Array[int]:
 	var available: Array[int] = []
-	for machine_type in [MachineType.MARBLE, MachineType.MOUSE, MachineType.ERASER, MachineType.PENCIL]:
+	for machine_type in [MachineType.MARBLE, MachineType.BATTERY, MachineType.ERASER, MachineType.PENCIL]:
 		if has(machine_type):
 			available.append(machine_type)
 	return available

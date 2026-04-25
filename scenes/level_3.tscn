@@ -1,0 +1,95 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/battery.tscn" id="1_battery"]
+[ext_resource type="PackedScene" uid="uid://dbuawikin6djx" path="res://scenes/eraser.tscn" id="2_eraser"]
+[ext_resource type="PackedScene" uid="uid://i4ni7f5u85c4" path="res://scenes/marble.tscn" id="3_marble"]
+[ext_resource type="Script" uid="uid://fg5g28ij00xe" path="res://scripts/machine_preview.gd" id="4_preview"]
+[ext_resource type="Script" uid="uid://uoodueoyb0h7" path="res://scripts/game_mode.gd" id="5_mode"]
+[ext_resource type="Script" uid="uid://dlt2axi1vsvvp" path="res://scripts/machine_inventory_data.gd" id="6_inventory"]
+[ext_resource type="Texture2D" uid="uid://b3pl5wwhfnvf3" path="res://sprites/karriertes_papier.png" id="7_bg"]
+[ext_resource type="PackedScene" uid="uid://2wftcuqetkpt" path="res://scenes/chair.tscn" id="8_chair"]
+[ext_resource type="Script" path="res://scripts/goal_area.gd" id="9_goal"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_level3"]
+font_color = Color(0, 0, 0, 1)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_goal3"]
+size = Vector2(138, 50)
+
+[node name="Level3" type="Node2D"]
+
+[node name="TextureRect" type="TextureRect" parent="."]
+offset_left = -1139.1819
+offset_top = -619.0
+offset_right = 3544.7068
+offset_bottom = 1834.4653
+scale = Vector2(0.505, 0.505)
+texture = ExtResource("7_bg")
+expand_mode = 2
+stretch_mode = 1
+
+[node name="Battery" parent="." instance=ExtResource("1_battery")]
+position = Vector2(56, 58)
+
+[node name="Camera2D" type="Camera2D" parent="."]
+
+[node name="Eraser" parent="." instance=ExtResource("2_eraser")]
+position = Vector2(211, -46)
+
+[node name="Marble" parent="." instance=ExtResource("3_marble")]
+position = Vector2(-411, -2)
+
+[node name="MachineInventoryData" type="Node" parent="."]
+script = ExtResource("6_inventory")
+marble_count = 8
+battery_count = 4
+eraser_count = 3
+pencil_count = 4
+
+[node name="MachinePreview" type="Node2D" parent="." node_paths=PackedStringArray("inventory_data", "spawn_parent")]
+script = ExtResource("4_preview")
+inventory_data = NodePath("../MachineInventoryData")
+spawn_parent = NodePath("..")
+
+[node name="GameModeController" type="Node" parent="." node_paths=PackedStringArray("game_mode_button", "game_mode_label")]
+script = ExtResource("5_mode")
+game_mode_button = NodePath("Button")
+game_mode_label = NodePath("Button/Label")
+
+[node name="Button" type="Button" parent="GameModeController"]
+offset_left = -495.0
+offset_top = -266.0
+offset_right = -320.0
+offset_bottom = -223.0
+toggle_mode = true
+text = "Play/Edit"
+
+[node name="Label" type="Label" parent="GameModeController/Button"]
+layout_mode = 0
+offset_left = 189.0
+offset_top = 12.0
+offset_right = 229.0
+offset_bottom = 35.0
+text = "Mode: Play"
+label_settings = SubResource("LabelSettings_level3")
+
+[node name="Chair" parent="." instance=ExtResource("8_chair")]
+position = Vector2(782, -40)
+
+[node name="ChairGoal" type="Node2D" parent="."]
+position = Vector2(820, 45)
+script = ExtResource("9_goal")
+target_object_path = NodePath("../Marble")
+objective_description = "Level 3: Land the marble on the far chair."
+completion_text = "All levels complete."
+
+[node name="Marker" type="Polygon2D" parent="ChairGoal"]
+color = Color(0.2, 0.85, 0.2, 0.28)
+
+[node name="Area2D" type="Area2D" parent="ChairGoal"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ChairGoal/Area2D"]
+shape = SubResource("RectangleShape2D_goal3")
+
+[connection signal="toggled" from="GameModeController/Button" to="GameModeController" method="_on_button_toggled"]
+[connection signal="body_entered" from="ChairGoal/Area2D" to="ChairGoal" method="_on_area_2d_body_entered"]

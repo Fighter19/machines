@@ -1,0 +1,121 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/battery.gd" id="1_bat"]
+[ext_resource type="Texture2D" uid="uid://bjv1sbdho7als" path="res://sprites/machines/battery.png" id="2_tex"]
+[ext_resource type="Script" uid="uid://bwxpwj8nrum" path="res://scripts/machine_physics_object.gd" id="3_phys"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_00"]
+atlas = ExtResource("2_tex")
+region = Rect2(0, 0, 85, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_01"]
+atlas = ExtResource("2_tex")
+region = Rect2(85, 0, 85, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_02"]
+atlas = ExtResource("2_tex")
+region = Rect2(170, 0, 85, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_03"]
+atlas = ExtResource("2_tex")
+region = Rect2(255, 0, 85, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_04"]
+atlas = ExtResource("2_tex")
+region = Rect2(340, 0, 85, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_05"]
+atlas = ExtResource("2_tex")
+region = Rect2(425, 0, 85, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_06"]
+atlas = ExtResource("2_tex")
+region = Rect2(510, 0, 85, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_07"]
+atlas = ExtResource("2_tex")
+region = Rect2(595, 0, 85, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_08"]
+atlas = ExtResource("2_tex")
+region = Rect2(680, 0, 85, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_09"]
+atlas = ExtResource("2_tex")
+region = Rect2(765, 0, 85, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_10"]
+atlas = ExtResource("2_tex")
+region = Rect2(850, 0, 85, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_11"]
+atlas = ExtResource("2_tex")
+region = Rect2(935, 0, 85, 128)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_battery"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_00")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_01")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_02")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_03")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_04")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_05")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_06")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_07")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_08")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_09")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_10")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_11")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 12.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_battery"]
+size = Vector2(42, 92)
+
+[node name="Battery" type="Node2D"]
+script = ExtResource("1_bat")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+scale = Vector2(0.75, 0.75)
+sprite_frames = SubResource("SpriteFrames_battery")
+animation = &"idle"
+autoplay = "idle"
+
+[node name="StaticBody2D" type="StaticBody2D" parent="."]
+input_pickable = true
+script = ExtResource("3_phys")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D"]
+position = Vector2(-1, 0)
+shape = SubResource("RectangleShape2D_battery")
+
+[connection signal="input_event" from="StaticBody2D" to="StaticBody2D" method="_on_input_event"]
+[connection signal="mouse_entered" from="StaticBody2D" to="StaticBody2D" method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="StaticBody2D" to="StaticBody2D" method="_on_mouse_exited"]

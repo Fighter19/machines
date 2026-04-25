@@ -4,7 +4,7 @@ class_name MachinePreview
 @export var inventory_data: MachineInventoryData
 @export var spawn_parent: Node
 @export var marble_scene: PackedScene = preload("res://scenes/marble.tscn")
-@export var mouse_scene: PackedScene = preload("res://scenes/mouse.tscn")
+@export var battery_scene: PackedScene
 @export var eraser_scene: PackedScene = preload("res://scenes/eraser.tscn")
 @export var pencil_scene: PackedScene = preload("res://scenes/pencil.tscn")
 @export var inventory_bar_texture: Texture2D = preload("res://sprites/ui/inventory.png")
@@ -44,6 +44,8 @@ func _ready() -> void:
 
 	if pin_button_texture == null:
 		pin_button_texture = load("res://sprites/ui/pin.png") as Texture2D
+	if battery_scene == null:
+		battery_scene = load("res://scenes/battery.tscn") as PackedScene
 
 	if game_mode_controller == null:
 		game_mode_controller = get_parent().find_child("GameModeController", false, false) as GameMode
@@ -331,16 +333,14 @@ func _machine_type_from_node(node: Node) -> int:
 	if node == null:
 		return -1
 
-	if node is Mouse:
-		return MachineInventoryData.MachineType.MOUSE
 	if node is Eraser:
 		return MachineInventoryData.MachineType.ERASER
 
 	var path := String(node.scene_file_path).to_lower()
 	if path.ends_with("marble.tscn"):
 		return MachineInventoryData.MachineType.MARBLE
-	if path.ends_with("mouse.tscn"):
-		return MachineInventoryData.MachineType.MOUSE
+	if path.ends_with("battery.tscn"):
+		return MachineInventoryData.MachineType.BATTERY
 	if path.ends_with("eraser.tscn"):
 		return MachineInventoryData.MachineType.ERASER
 	if path.ends_with("pencil.tscn"):
@@ -349,8 +349,8 @@ func _machine_type_from_node(node: Node) -> int:
 	var lower_name := String(node.name).to_lower()
 	if lower_name.contains("marble"):
 		return MachineInventoryData.MachineType.MARBLE
-	if lower_name.contains("mouse"):
-		return MachineInventoryData.MachineType.MOUSE
+	if lower_name.contains("battery"):
+		return MachineInventoryData.MachineType.BATTERY
 	if lower_name.contains("eraser"):
 		return MachineInventoryData.MachineType.ERASER
 	if lower_name.contains("pencil"):
@@ -401,8 +401,8 @@ func _scene_for_type(machine_type: MachineInventoryData.MachineType) -> PackedSc
 	match machine_type:
 		MachineInventoryData.MachineType.MARBLE:
 			return marble_scene
-		MachineInventoryData.MachineType.MOUSE:
-			return mouse_scene
+		MachineInventoryData.MachineType.BATTERY:
+			return battery_scene
 		MachineInventoryData.MachineType.ERASER:
 			return eraser_scene
 		MachineInventoryData.MachineType.PENCIL:
@@ -465,7 +465,7 @@ func _create_left_menu() -> void:
 
 	for machine_type in [
 		MachineInventoryData.MachineType.MARBLE,
-		MachineInventoryData.MachineType.MOUSE,
+		MachineInventoryData.MachineType.BATTERY,
 		MachineInventoryData.MachineType.ERASER,
 		MachineInventoryData.MachineType.PENCIL
 	]:
@@ -640,8 +640,8 @@ func _type_name(machine_type: MachineInventoryData.MachineType) -> String:
 	match machine_type:
 		MachineInventoryData.MachineType.MARBLE:
 			return "Marble"
-		MachineInventoryData.MachineType.MOUSE:
-			return "Mouse"
+		MachineInventoryData.MachineType.BATTERY:
+			return "Battery"
 		MachineInventoryData.MachineType.ERASER:
 			return "Eraser"
 		MachineInventoryData.MachineType.PENCIL:
