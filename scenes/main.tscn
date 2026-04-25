@@ -1,6 +1,5 @@
 [gd_scene format=3 uid="uid://bxrjkx8lfwyho"]
 
-[ext_resource type="PackedScene" path="res://scenes/battery.tscn" id="2_0wfyh"]
 [ext_resource type="PackedScene" uid="uid://dbuawikin6djx" path="res://scenes/eraser.tscn" id="2_jyhfs"]
 [ext_resource type="PackedScene" uid="uid://i4ni7f5u85c4" path="res://scenes/marble.tscn" id="2_sugp2"]
 [ext_resource type="Script" uid="uid://fg5g28ij00xe" path="res://scripts/machine_preview.gd" id="3_8v11n"]
@@ -29,8 +28,6 @@ texture = ExtResource("5_tbgi4")
 expand_mode = 2
 stretch_mode = 1
 
-[node name="Battery" parent="." unique_id=1278409488 instance=ExtResource("2_0wfyh")]
-
 [node name="Camera2D" type="Camera2D" parent="." unique_id=2027311616]
 
 [node name="Node" parent="." unique_id=1564238713 instance=ExtResource("2_jyhfs")]
@@ -40,9 +37,9 @@ position = Vector2(3, -34)
 
 [node name="MachineInventoryData" type="Node" parent="." unique_id=191646385]
 script = ExtResource("5_8v11n")
-marble_count = 9
-battery_count = 5
-eraser_count = 3
+marble_count = 0
+battery_count = 0
+eraser_count = 1
 
 [node name="MachinePreview" type="Node2D" parent="." unique_id=1160741803 node_paths=PackedStringArray("inventory_data", "spawn_parent")]
 script = ExtResource("3_8v11n")
