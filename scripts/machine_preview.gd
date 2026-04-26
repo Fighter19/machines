@@ -2,6 +2,8 @@ extends Node2D
 class_name MachinePreview
 
 const INVENTORY_CONTENT_VERTICAL_SHIFT: float = 12.0
+const SPEAKER_UNMUTED_GLYPH: String = "🔊\uFE0E"
+const SPEAKER_MUTED_GLYPH: String = "🔇\uFE0E"
 
 @export var inventory_data: MachineInventoryData
 @export var spawn_parent: Node
@@ -12,6 +14,7 @@ const INVENTORY_CONTENT_VERTICAL_SHIFT: float = 12.0
 @export var inventory_bar_texture: Texture2D = preload("res://sprites/ui/inventory.png")
 @export var rotate_button_texture: Texture2D = preload("res://sprites/ui/rotate.png")
 @export var pin_button_texture: Texture2D
+@export var speaker_icon_font: Font = preload("res://font/NotoSansSymbols2-Regular.ttf")
 @export var preview_alpha: float = 0.55
 @export var menu_width: float = 170.0
 @export var game_mode_controller: GameMode
@@ -542,6 +545,13 @@ func _create_mute_button() -> void:
 	mute_audio_button.add_theme_stylebox_override("hover", StyleBoxEmpty.new())
 	mute_audio_button.add_theme_stylebox_override("pressed", StyleBoxEmpty.new())
 	mute_audio_button.add_theme_stylebox_override("disabled", StyleBoxEmpty.new())
+	mute_audio_button.add_theme_color_override("font_color", Color.BLACK)
+	mute_audio_button.add_theme_color_override("font_hover_color", Color.DARK_GRAY)
+	# mute_audio_button.add_theme_color_override("font_pressed_color", Color.BLACK)
+	# mute_audio_button.add_theme_color_override("font_disabled_color", Color.BLACK)
+	if speaker_icon_font != null:
+		mute_audio_button.add_theme_font_override("font", speaker_icon_font)
+		mute_audio_button.add_theme_font_size_override("font_size", 30)
 	mute_audio_button.pressed.connect(_on_mute_audio_button_pressed)
 	menu_panel.add_child(mute_audio_button)
 
@@ -560,16 +570,16 @@ func _update_mute_button_label() -> void:
 		return
 
 	if master_bus_index < 0:
-		mute_audio_button.text = "🔊"
+		mute_audio_button.text = SPEAKER_UNMUTED_GLYPH
 		mute_audio_button.tooltip_text = "Mute"
 		return
 
 	var is_muted: bool = AudioServer.is_bus_mute(master_bus_index)
 	if is_muted:
-		mute_audio_button.text = "🔇"
+		mute_audio_button.text = SPEAKER_MUTED_GLYPH
 		mute_audio_button.tooltip_text = "Unmute"
 	else:
-		mute_audio_button.text = "🔊"
+		mute_audio_button.text = SPEAKER_UNMUTED_GLYPH
 		mute_audio_button.tooltip_text = "Mute"
 
 func _update_inventory_bar_layout() -> void:

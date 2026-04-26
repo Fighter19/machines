@@ -8,8 +8,8 @@
 [ext_resource type="Texture2D" uid="uid://b3pl5wwhfnvf3" path="res://sprites/karriertes_papier.png" id="5_tbgi4"]
 [ext_resource type="PackedScene" uid="uid://2wftcuqetkpt" path="res://scenes/chair.tscn" id="8_tipki"]
 [ext_resource type="Script" uid="uid://dabrphmret3pt" path="res://scripts/goal_area.gd" id="9_tqsce"]
-[ext_resource type="PackedScene" path="res://scenes/level_2.tscn" id="10_lvl2"]
-[ext_resource type="Script" path="res://scripts/main_level_flash.gd" id="11_flash"]
+[ext_resource type="PackedScene" uid="uid://274m7korfe5w" path="res://scenes/level_2.tscn" id="10_lvl2"]
+[ext_resource type="Script" uid="uid://jpshbq0873pk" path="res://scripts/main_level_flash.gd" id="11_flash"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_tbgi4"]
 font_color = Color(0, 0, 0, 1)
@@ -98,7 +98,6 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(1, 1, 1, 1)
 
 [connection signal="toggled" from="GameModeController/Button" to="GameModeController" method="_on_button_toggled"]
 [connection signal="body_entered" from="ChairGoal/Area2D" to="ChairGoal" method="_on_area_2d_body_entered"]
