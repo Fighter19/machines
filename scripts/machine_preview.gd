@@ -37,6 +37,7 @@ var menu_buttons: Dictionary = {}
 var menu_button_labels: Dictionary = {}
 var menu_button_icons: Dictionary = {}
 var menu_button_icon_slots: Dictionary = {}
+var menu_button_contents: Dictionary = {}
 var last_known_mode: int = -1
 var item_action_menu: HBoxContainer
 var rotate_action_button: Button
@@ -553,6 +554,7 @@ func _create_left_menu() -> void:
 		menu_button_labels[machine_type] = button_label
 		menu_button_icons[machine_type] = icon
 		menu_button_icon_slots[machine_type] = icon_slot
+		menu_button_contents[machine_type] = content
 
 func _create_mute_button() -> void:
 	if menu_panel == null:
@@ -631,13 +633,28 @@ func _update_inventory_bar_layout() -> void:
 		menu_content.offset_top = -bar_height + 10 - INVENTORY_CONTENT_VERTICAL_SHIFT
 		menu_content.offset_bottom = -10 - INVENTORY_CONTENT_VERTICAL_SHIFT
 
+	var inventory_button_width: float = 112.0
+	var inventory_button_count: int = menu_buttons.size()
+	if inventory_button_count > 0 and menu_content != null:
+		var content_width: float = viewport_size.x + menu_content.offset_right - menu_content.offset_left
+		var content_separation: float = float(menu_content.get_theme_constant("separation"))
+		var total_separation: float = content_separation * float(max(inventory_button_count - 1, 0))
+		var available_button_width: float = max(content_width - total_separation, 0.0)
+		inventory_button_width = clamp(available_button_width / float(inventory_button_count), 84.0, 112.0)
+
 	for machine_type in menu_buttons.keys():
 		var item_button := menu_buttons[machine_type] as Button
 		if item_button == null:
 			continue
 
 		var button_height: float = clamp(bar_height - 26.0, 64.0, 90.0)
-		item_button.custom_minimum_size = Vector2(112, button_height)
+		var button_width: float = inventory_button_width
+		var content := menu_button_contents.get(machine_type) as VBoxContainer
+		if content != null:
+			var content_required_width: float = content.get_combined_minimum_size().x + 12.0
+			button_width = max(button_width, content_required_width)
+
+		item_button.custom_minimum_size = Vector2(button_width, button_height)
 		var shared_icon_slot_height: float = _inventory_icon_size_for(MachineInventoryData.MachineType.MARBLE, button_height)
 
 		var icon_slot := menu_button_icon_slots.get(machine_type) as CenterContainer
