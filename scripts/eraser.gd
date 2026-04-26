@@ -2,12 +2,17 @@ extends Machine
 class_name Eraser
 
 @onready var physics_object: MachinePhysicsObject = $StaticBody2D
+@onready var boing_player: AudioStreamPlayer2D = $BoingAudioStreamPlayer2D
 
 func machine_on_collided(node: Node2D) -> void:
 	print("Collided with node " + node.to_string())
 	if node is RigidBody2D:
 		var rigidBody : RigidBody2D = node;
 		rigidBody.apply_impulse(Vector2(0, -500))
+		if boing_player != null:
+			if boing_player.playing:
+				boing_player.stop()
+			boing_player.play()
 	if sprite.sprite_frames.has_animation("active"):
 		sprite.play("active")
 

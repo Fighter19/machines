@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://bp35qaml77ime" path="res://scripts/eraser.gd" id="1_famxi"]
 [ext_resource type="Texture2D" uid="uid://b4wr16irigf6" path="res://sprites/machines/eraser.png" id="1_yny2t"]
 [ext_resource type="Script" uid="uid://bwxpwj8nrum" path="res://scripts/machine_physics_object.gd" id="2_kqh8n"]
+[ext_resource type="AudioStream" path="res://audio/boing.ogg" id="3_boing"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_famxi"]
 atlas = ExtResource("1_yny2t")
@@ -57,6 +58,9 @@ script = ExtResource("2_kqh8n")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D" unique_id=483121760]
 shape = SubResource("RectangleShape2D_ouscy")
+
+[node name="BoingAudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="." unique_id=1773442059]
+stream = ExtResource("3_boing")
 
 [connection signal="animation_finished" from="AnimatedSprite2D" to="." method="_on_animated_sprite_2d_animation_finished"]
 [connection signal="input_event" from="StaticBody2D" to="StaticBody2D" method="_on_input_event"]
