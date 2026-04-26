@@ -7,6 +7,7 @@ signal level_completed
 @export var next_level: PackedScene
 @export_multiline var objective_description: String = "Get the marble onto the chair."
 @export_multiline var completion_text: String = "The objective is complete."
+@export var completion_sound: AudioStream = preload("res://audio/good_job.ogg")
 @export var show_marker: bool = true:
 	set(value):
 		show_marker = value
@@ -27,9 +28,15 @@ var overlay_layer: CanvasLayer
 var objective_overlay: Control
 var completion_overlay: Control
 var game_mode_controller: GameMode
+var completion_player: AudioStreamPlayer
 
 func _ready() -> void:
 	game_mode_controller = get_parent().find_child("GameModeController", false, false) as GameMode
+	completion_player = AudioStreamPlayer.new()
+	completion_player.name = "CompletionPlayer"
+	completion_player.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
+	completion_player.stream = completion_sound
+	add_child(completion_player)
 	_update_marker()
 	call_deferred("_show_objective_if_needed")
 
@@ -83,6 +90,8 @@ func _complete_level() -> void:
 		return
 
 	completion_shown = true
+	if completion_player != null and completion_player.stream != null:
+		completion_player.play()
 	emit_signal("level_completed")
 
 	var message := completion_text.strip_edges()
