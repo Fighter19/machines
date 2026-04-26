@@ -5,7 +5,7 @@ const SILENT_DB: float = -80.0
 
 @export var roll_volume_scale: float = 0.15
 @export var transition_volume_scale: float = 0.15
-@export var required_contact_time: float = 0.05
+@export var required_contact_time: float = 0.06
 @export var start_linear_speed: float = 10.0
 @export var stop_linear_speed: float = 5.0
 @export var near_stop_linear_speed: float = 7.0

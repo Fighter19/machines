@@ -60,6 +60,8 @@ func _ready() -> void:
 	_create_left_menu()
 	_create_item_action_menu()
 	_position_game_mode_button()
+	# GameModeController may create EditButton in its own _ready after this node.
+	call_deferred("_position_game_mode_button")
 	_update_inventory_bar_layout()
 	get_viewport().size_changed.connect(_update_inventory_bar_layout)
 	_update_menu_contents()
@@ -557,6 +559,8 @@ func _update_inventory_bar_layout() -> void:
 			var icon_side := _inventory_icon_size_for(machine_type, button_height)
 			icon.custom_minimum_size = Vector2(icon_side, icon_side)
 
+	_position_game_mode_button()
+
 func _inventory_icon_size_for(machine_type: MachineInventoryData.MachineType, button_height: float) -> float:
 	# Keep pencil at the previous visual size; increase other inventory icons.
 	if machine_type == MachineInventoryData.MachineType.PENCIL:
@@ -570,27 +574,60 @@ func _position_game_mode_button() -> void:
 	if game_mode_controller == null:
 		return
 
-	var game_mode_button := game_mode_controller.get_node_or_null("Button") as Button
-	if game_mode_button == null:
+	var play_mode_button := _get_mode_button("Button")
+	if play_mode_button == null:
 		return
+	var edit_mode_button := _get_mode_button("EditButton")
 
-	if game_mode_button.get_parent() != menu_panel:
-		game_mode_button.reparent(menu_panel)
+	if play_mode_button.get_parent() != menu_panel:
+		play_mode_button.reparent(menu_panel)
+	if edit_mode_button != null and edit_mode_button.get_parent() != menu_panel:
+		edit_mode_button.reparent(menu_panel)
 
-	game_mode_button.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
-	game_mode_button.offset_right = -18
-	game_mode_button.offset_left = -218
-	game_mode_button.offset_bottom = -26
-	game_mode_button.offset_top = -82
-	game_mode_button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-	game_mode_button.add_theme_stylebox_override("normal", StyleBoxEmpty.new())
-	game_mode_button.add_theme_stylebox_override("hover", StyleBoxEmpty.new())
-	game_mode_button.add_theme_stylebox_override("pressed", StyleBoxEmpty.new())
-	game_mode_button.add_theme_stylebox_override("disabled", StyleBoxEmpty.new())
+	var viewport_size := get_viewport().get_visible_rect().size
+	var right_margin := 18.0
+	var left_margin := 8.0
+	var button_gap := -26.0
+	var button_side := 148.0
+	var min_required_width := right_margin + left_margin + button_gap + button_side * 2.0
+	if viewport_size.x < min_required_width:
+		button_side = max(64.0, (viewport_size.x - right_margin - left_margin - button_gap) * 0.5)
 
-	var mode_label := game_mode_button.get_node_or_null("Label") as Label
-	if mode_label != null:
-		mode_label.visible = false
+	var bar_height := 128.0
+	if inventory_background != null and inventory_background.texture != null:
+		var tex_size := inventory_background.texture.get_size()
+		if tex_size.x > 0.0:
+			bar_height = (viewport_size.x / tex_size.x) * tex_size.y
+
+	# Center with inventory bar, nudged slightly downward.
+	var vertical_nudge := -32.0
+	var bar_center_offset := -bar_height * 0.5 + vertical_nudge
+	var button_top: float = bar_center_offset - button_side * 0.5
+	var button_bottom: float = bar_center_offset + button_side * 0.5
+
+	for button in [play_mode_button, edit_mode_button]:
+		if button == null:
+			continue
+		button.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+		button.offset_bottom = button_bottom
+		button.offset_top = button_top
+		button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+		button.add_theme_stylebox_override("normal", StyleBoxEmpty.new())
+		button.add_theme_stylebox_override("hover", StyleBoxEmpty.new())
+		button.add_theme_stylebox_override("pressed", StyleBoxEmpty.new())
+		button.add_theme_stylebox_override("disabled", StyleBoxEmpty.new())
+		button.custom_minimum_size = Vector2(button_side, button_side)
+
+		var mode_label := button.get_node_or_null("Label") as Label
+		if mode_label != null:
+			mode_label.visible = false
+
+	play_mode_button.offset_right = -right_margin
+	play_mode_button.offset_left = play_mode_button.offset_right - button_side
+
+	if edit_mode_button != null:
+		edit_mode_button.offset_right = play_mode_button.offset_left - button_gap
+		edit_mode_button.offset_left = edit_mode_button.offset_right - button_side
 
 func _update_menu_contents() -> void:
 	var edit_mode := _is_edit_mode()
@@ -614,6 +651,7 @@ func _update_menu_contents() -> void:
 			button_label.text = "%s (%d)" % [_type_name(machine_type), amount]
 		button.disabled = !edit_mode or amount <= 0
 
+	_position_game_mode_button()
 func _on_machine_button_down(machine_type: MachineInventoryData.MachineType) -> void:
 	if !_is_edit_mode():
 		return
@@ -651,11 +689,28 @@ func _is_point_over_menu(viewport_position: Vector2) -> bool:
 		return true
 
 	if game_mode_controller != null:
-		var game_mode_button := game_mode_controller.get_node_or_null("Button") as Button
-		if game_mode_button != null and game_mode_button.get_global_rect().has_point(viewport_position):
+		var play_mode_button := _get_mode_button("Button")
+		if play_mode_button != null and play_mode_button.get_global_rect().has_point(viewport_position):
+			return true
+
+		var edit_mode_button := _get_mode_button("EditButton")
+		if edit_mode_button != null and edit_mode_button.get_global_rect().has_point(viewport_position):
 			return true
 
 	return false
+
+func _get_mode_button(button_name: String) -> Button:
+	if menu_panel != null:
+		var in_menu := menu_panel.get_node_or_null(button_name) as Button
+		if in_menu != null:
+			return in_menu
+
+	if game_mode_controller != null:
+		var in_controller := game_mode_controller.get_node_or_null(button_name) as Button
+		if in_controller != null:
+			return in_controller
+
+	return null
 
 func _type_name(machine_type: MachineInventoryData.MachineType) -> String:
 	match machine_type:
