@@ -1,6 +1,8 @@
 extends Node2D
 class_name MachinePreview
 
+const INVENTORY_CONTENT_VERTICAL_SHIFT: float = 12.0
+
 @export var inventory_data: MachineInventoryData
 @export var spawn_parent: Node
 @export var marble_scene: PackedScene = preload("res://scenes/marble.tscn")
@@ -25,6 +27,8 @@ var menu_title_label: Label
 var menu_content: HBoxContainer
 var menu_buttons: Dictionary = {}
 var menu_button_labels: Dictionary = {}
+var menu_button_icons: Dictionary = {}
+var menu_button_icon_slots: Dictionary = {}
 var last_known_mode: int = -1
 var item_action_menu: HBoxContainer
 var rotate_action_button: Button
@@ -453,8 +457,8 @@ func _create_left_menu() -> void:
 	menu_content.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
 	menu_content.offset_left = 20
 	menu_content.offset_right = -220
-	menu_content.offset_bottom = -18
-	menu_content.offset_top = -138
+	menu_content.offset_bottom = -18 - INVENTORY_CONTENT_VERTICAL_SHIFT
+	menu_content.offset_top = -138 - INVENTORY_CONTENT_VERTICAL_SHIFT
 	menu_content.alignment = BoxContainer.ALIGNMENT_CENTER
 	menu_content.add_theme_constant_override("separation", 10)
 	menu_content.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -486,9 +490,14 @@ func _create_left_menu() -> void:
 		content.offset_right = -6
 		content.offset_bottom = -4
 		content.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		content.alignment = BoxContainer.ALIGNMENT_CENTER
+		content.alignment = BoxContainer.ALIGNMENT_END
 		content.add_theme_constant_override("separation", 3)
 		button.add_child(content)
+
+		var icon_slot := CenterContainer.new()
+		icon_slot.custom_minimum_size = Vector2(0, 44)
+		icon_slot.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		content.add_child(icon_slot)
 
 		var icon := TextureRect.new()
 		icon.custom_minimum_size = Vector2(40, 40)
@@ -496,15 +505,18 @@ func _create_left_menu() -> void:
 		icon.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
 		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		icon.texture = _get_machine_preview_texture(machine_type)
-		content.add_child(icon)
+		icon_slot.add_child(icon)
 
 		var button_label := Label.new()
 		button_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		button_label.custom_minimum_size = Vector2(0, 20)
 		button_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		content.add_child(button_label)
 
 		menu_buttons[machine_type] = button
 		menu_button_labels[machine_type] = button_label
+		menu_button_icons[machine_type] = icon
+		menu_button_icon_slots[machine_type] = icon_slot
 
 func _update_inventory_bar_layout() -> void:
 	if inventory_background == null:
@@ -524,23 +536,32 @@ func _update_inventory_bar_layout() -> void:
 	inventory_background.offset_top = -bar_height
 
 	if menu_content != null:
-		menu_content.offset_top = -bar_height + 10
-		menu_content.offset_bottom = -10
+		menu_content.offset_top = -bar_height + 10 - INVENTORY_CONTENT_VERTICAL_SHIFT
+		menu_content.offset_bottom = -10 - INVENTORY_CONTENT_VERTICAL_SHIFT
 
-	for button in menu_buttons.values():
-		var item_button := button as Button
+	for machine_type in menu_buttons.keys():
+		var item_button := menu_buttons[machine_type] as Button
 		if item_button == null:
 			continue
 
 		var button_height: float = clamp(bar_height - 26.0, 64.0, 90.0)
 		item_button.custom_minimum_size = Vector2(112, button_height)
+		var shared_icon_slot_height: float = _inventory_icon_size_for(MachineInventoryData.MachineType.MARBLE, button_height)
 
-		var content := item_button.get_child(0) as VBoxContainer
-		if content != null and content.get_child_count() > 0:
-			var icon := content.get_child(0) as TextureRect
-			if icon != null:
-				var icon_side: float = clamp(button_height * 0.45, 30.0, 44.0)
-				icon.custom_minimum_size = Vector2(icon_side, icon_side)
+		var icon_slot := menu_button_icon_slots.get(machine_type) as CenterContainer
+		if icon_slot != null:
+			icon_slot.custom_minimum_size = Vector2(0, shared_icon_slot_height)
+
+		var icon := menu_button_icons.get(machine_type) as TextureRect
+		if icon != null:
+			var icon_side := _inventory_icon_size_for(machine_type, button_height)
+			icon.custom_minimum_size = Vector2(icon_side, icon_side)
+
+func _inventory_icon_size_for(machine_type: MachineInventoryData.MachineType, button_height: float) -> float:
+	# Keep pencil at the previous visual size; increase other inventory icons.
+	if machine_type == MachineInventoryData.MachineType.PENCIL:
+		return clamp(button_height * 0.45, 30.0, 44.0)
+	return clamp(button_height * 0.90, 57.0, 84.0)
 
 func _position_game_mode_button() -> void:
 	if menu_content == null:
