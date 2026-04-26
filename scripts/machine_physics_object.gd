@@ -16,6 +16,7 @@ var current_mode = MachineGameMode.EDIT
 var edit_position: Vector2
 var edit_rotation: float = 0.0
 var has_saved_edit_position: bool = false
+static var cursor_owner: MachinePhysicsObject = null
 
 func _ready() -> void:
 	# Seed restore position from the current transform so freshly spawned
@@ -99,21 +100,35 @@ func is_pinned_in_play() -> bool:
 			#if result[0].collider is MachinePhysicsObject:
 				#print("Collided with MachinePhysicsObject")
 
-var grab_cursor = load("res://sprites/ui/grab.png")
+var grab_cursor_neutral = load("res://sprites/ui/cursor_grab1.png")
+var grab_cursor_pressed = load("res://sprites/ui/cursor_grab2.png")
+
+func _update_grab_cursor() -> void:
+	if !draggable or !is_hovering or current_mode != MachineGameMode.EDIT:
+		if cursor_owner == self:
+			Input.set_custom_mouse_cursor(null)
+			cursor_owner = null
+		return
+
+	var cursor_texture = grab_cursor_neutral
+	if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+		cursor_texture = grab_cursor_pressed
+	cursor_owner = self
+	Input.set_custom_mouse_cursor(cursor_texture, Input.CURSOR_ARROW, Vector2(4, 11))
 
 func _on_mouse_entered() -> void:
 	if !draggable:
 		return
 	if current_mode == MachineGameMode.EDIT:
-		Input.set_custom_mouse_cursor(grab_cursor, Input.CURSOR_ARROW, Vector2(12, 18))
 		is_hovering = true
+		_update_grab_cursor()
 
 
 func _on_mouse_exited() -> void:
 	if !draggable:
 		return
-	Input.set_custom_mouse_cursor(null)
 	is_hovering = false
+	_update_grab_cursor()
 
 
 func _on_input_event(_viewport: Node, event: InputEvent, _shape_idx: int) -> void:
@@ -143,11 +158,16 @@ func _on_input_event(_viewport: Node, event: InputEvent, _shape_idx: int) -> voi
 
 func _process(_delta: float) -> void:
 	if !draggable:
-		if is_hovering:
+		if cursor_owner == self:
 			Input.set_custom_mouse_cursor(null)
+			cursor_owner = null
 		is_hovering = false
 		is_grabbed = false
 		is_press_candidate = false
+		return
+
+	if is_hovering or cursor_owner == self:
+		_update_grab_cursor()
 
 	var drag_target := _get_drag_target()
 	if is_press_candidate and !is_grabbed and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):

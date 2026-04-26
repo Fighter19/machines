@@ -14,6 +14,11 @@ const SPEAKER_MUTED_GLYPH: String = "🔇\uFE0E"
 @export var inventory_bar_texture: Texture2D = preload("res://sprites/ui/inventory.png")
 @export var rotate_button_texture: Texture2D = preload("res://sprites/ui/rotate.png")
 @export var pin_button_texture: Texture2D
+@export var ui_click_cursor_neutral_texture: Texture2D = preload("res://sprites/ui/cursor_click1.png")
+@export var ui_click_cursor_pressed_texture: Texture2D = preload("res://sprites/ui/cursor_click2.png")
+@export var ui_grab_cursor_neutral_texture: Texture2D = preload("res://sprites/ui/cursor_grab1.png")
+# The hotspot of the click cursor
+@export var ui_cursor_hotspot: Vector2 = Vector2(5, 2)
 @export var speaker_icon_font: Font = preload("res://font/NotoSansSymbols2-Regular.ttf")
 @export var preview_alpha: float = 0.55
 @export var menu_width: float = 170.0
@@ -40,6 +45,7 @@ var mute_audio_button: Button
 var master_bus_index: int = -1
 var selected_machine_object: MachinePhysicsObject
 var selected_drag_target: Node2D
+var was_left_mouse_pressed: bool = false
 
 func _ready() -> void:
 	add_to_group("machine_preview")
@@ -60,6 +66,7 @@ func _ready() -> void:
 		game_mode_controller = get_parent().find_child("GameModeController", false, false) as GameMode
 	if game_mode_controller != null:
 		last_known_mode = game_mode_controller.current_mode
+	_apply_ui_cursor_textures()
 
 	selected_type = _first_available_type(selected_type)
 	_create_left_menu()
@@ -72,6 +79,25 @@ func _ready() -> void:
 	get_viewport().size_changed.connect(_update_inventory_bar_layout)
 	_update_menu_contents()
 	_refresh_preview_instance()
+
+func _apply_ui_cursor_textures() -> void:
+	if ui_grab_cursor_neutral_texture != null:
+		Input.set_custom_mouse_cursor(ui_grab_cursor_neutral_texture, Input.CURSOR_DRAG, Vector2(4, 11))
+
+	_update_ui_click_cursor_state(true)
+
+func _update_ui_click_cursor_state(force_update: bool = false) -> void:
+	var is_pressed := Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)
+	if !force_update and is_pressed == was_left_mouse_pressed:
+		return
+
+	was_left_mouse_pressed = is_pressed
+	var click_texture := ui_click_cursor_neutral_texture
+	if is_pressed and ui_click_cursor_pressed_texture != null:
+		click_texture = ui_click_cursor_pressed_texture
+
+	if click_texture != null:
+		Input.set_custom_mouse_cursor(click_texture, Input.CURSOR_POINTING_HAND, ui_cursor_hotspot)
 
 func _process(_delta: float) -> void:
 	if game_mode_controller != null and game_mode_controller.current_mode != last_known_mode:
@@ -95,6 +121,8 @@ func _process(_delta: float) -> void:
 		global_position = cursor
 		if preview_instance != null:
 			_set_preview_position(preview_instance, cursor)
+
+	_update_ui_click_cursor_state()
 
 func _input(event: InputEvent) -> void:
 	if !is_dragging_machine:
@@ -483,7 +511,7 @@ func _create_left_menu() -> void:
 	]:
 		var button := Button.new()
 		button.custom_minimum_size = Vector2(112, 84)
-		button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+		button.mouse_default_cursor_shape = Control.CURSOR_DRAG
 		button.button_down.connect(_on_machine_button_down.bind(machine_type))
 		button.add_theme_stylebox_override("normal", StyleBoxEmpty.new())
 		button.add_theme_stylebox_override("hover", StyleBoxEmpty.new())
