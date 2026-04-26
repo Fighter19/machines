@@ -4,3 +4,7 @@
 
 # Prototype assets to exclude from source control
 all_machines.png*
+
+# Currently no license is granted by us for use of the main soundtrack
+# exclude it from the release
+audio/GameSong.mp3*

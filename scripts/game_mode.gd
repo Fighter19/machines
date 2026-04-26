@@ -16,10 +16,12 @@ var current_mode: MachineGameMode = MachineGameMode.PLAY
 @export var bubble_frame_count: int = 4
 @export var bubble_frame_size: Vector2i = Vector2i(128, 128)
 @export var bubble_animation_fps: float = 14.0
+@export var bubble_press_sound: AudioStream = preload("res://audio/plopp.ogg")
 
 var play_button: Button
 var edit_button: Button
 var pending_mode: int = -1
+var bubble_press_player: AudioStreamPlayer
 
 # Synchronize UI with state
 func update_mode():
@@ -101,10 +103,19 @@ func _request_mode_change(target_mode: MachineGameMode) -> void:
 		return
 
 	pending_mode = int(target_mode)
+	_play_bubble_press_sound()
 	bubble.visible = true
 	bubble.stop()
 	bubble.frame = 0
 	bubble.play("pop")
+
+func _play_bubble_press_sound() -> void:
+	if bubble_press_player == null:
+		return
+	if bubble_press_player.stream == null:
+		return
+
+	bubble_press_player.play()
 
 func _on_bubble_animation_finished(mode: int) -> void:
 	var mode_value := mode as MachineGameMode
@@ -240,6 +251,11 @@ func _ensure_mode_button_visuals(button: Button, mode: MachineGameMode) -> void:
 	_sync_button_visual_positions(button)
 
 func _ready() -> void:
+	bubble_press_player = AudioStreamPlayer.new()
+	bubble_press_player.name = "BubblePressPlayer"
+	bubble_press_player.stream = bubble_press_sound
+	add_child(bubble_press_player)
+
 	_ensure_mode_buttons()
 
 	# current_mode needs to be on !EDIT for this to work

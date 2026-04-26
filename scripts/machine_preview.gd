@@ -33,6 +33,8 @@ var last_known_mode: int = -1
 var item_action_menu: HBoxContainer
 var rotate_action_button: Button
 var pin_action_button: Button
+var mute_audio_button: Button
+var master_bus_index: int = -1
 var selected_machine_object: MachinePhysicsObject
 var selected_drag_target: Node2D
 
@@ -58,6 +60,7 @@ func _ready() -> void:
 
 	selected_type = _first_available_type(selected_type)
 	_create_left_menu()
+	_create_mute_button()
 	_create_item_action_menu()
 	_position_game_mode_button()
 	# GameModeController may create EditButton in its own _ready after this node.
@@ -520,6 +523,55 @@ func _create_left_menu() -> void:
 		menu_button_icons[machine_type] = icon
 		menu_button_icon_slots[machine_type] = icon_slot
 
+func _create_mute_button() -> void:
+	if menu_panel == null:
+		return
+
+	master_bus_index = AudioServer.get_bus_index("Master")
+
+	mute_audio_button = Button.new()
+	mute_audio_button.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	mute_audio_button.offset_left = -64
+	mute_audio_button.offset_right = -16
+	mute_audio_button.offset_top = 14
+	mute_audio_button.offset_bottom = 62
+	mute_audio_button.custom_minimum_size = Vector2(48, 48)
+	mute_audio_button.focus_mode = Control.FOCUS_NONE
+	mute_audio_button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	mute_audio_button.add_theme_stylebox_override("normal", StyleBoxEmpty.new())
+	mute_audio_button.add_theme_stylebox_override("hover", StyleBoxEmpty.new())
+	mute_audio_button.add_theme_stylebox_override("pressed", StyleBoxEmpty.new())
+	mute_audio_button.add_theme_stylebox_override("disabled", StyleBoxEmpty.new())
+	mute_audio_button.pressed.connect(_on_mute_audio_button_pressed)
+	menu_panel.add_child(mute_audio_button)
+
+	_update_mute_button_label()
+
+func _on_mute_audio_button_pressed() -> void:
+	if master_bus_index < 0:
+		return
+
+	var is_muted: bool = AudioServer.is_bus_mute(master_bus_index)
+	AudioServer.set_bus_mute(master_bus_index, !is_muted)
+	_update_mute_button_label()
+
+func _update_mute_button_label() -> void:
+	if mute_audio_button == null:
+		return
+
+	if master_bus_index < 0:
+		mute_audio_button.text = "🔊"
+		mute_audio_button.tooltip_text = "Mute"
+		return
+
+	var is_muted: bool = AudioServer.is_bus_mute(master_bus_index)
+	if is_muted:
+		mute_audio_button.text = "🔇"
+		mute_audio_button.tooltip_text = "Unmute"
+	else:
+		mute_audio_button.text = "🔊"
+		mute_audio_button.tooltip_text = "Mute"
+
 func _update_inventory_bar_layout() -> void:
 	if inventory_background == null:
 		return
@@ -696,6 +748,9 @@ func _is_point_over_menu(viewport_position: Vector2) -> bool:
 		var edit_mode_button := _get_mode_button("EditButton")
 		if edit_mode_button != null and edit_mode_button.get_global_rect().has_point(viewport_position):
 			return true
+
+	if mute_audio_button != null and mute_audio_button.get_global_rect().has_point(viewport_position):
+		return true
 
 	return false
 
