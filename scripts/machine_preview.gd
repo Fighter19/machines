@@ -678,10 +678,11 @@ func _position_game_mode_button() -> void:
 	var right_margin := 18.0
 	var left_margin := 8.0
 	var button_gap := -26.0
-	var button_side := 148.0
+	var bubble_scale := 1.35
+	var button_side := 148.0 * bubble_scale
 	var min_required_width := right_margin + left_margin + button_gap + button_side * 2.0
 	if viewport_size.x < min_required_width:
-		button_side = max(64.0, (viewport_size.x - right_margin - left_margin - button_gap) * 0.5)
+		button_side = max(64.0 * bubble_scale, (viewport_size.x - right_margin - left_margin - button_gap) * 0.5)
 
 	var bar_height := 128.0
 	if inventory_background != null and inventory_background.texture != null:
