@@ -1,0 +1,9 @@
+The code is licensed under MIT (see LICENSE.MIT).
+
+Other assets (graphics and audio) are generally currently not licensed for use outside of this project.
+Using them as placeholders is fine during development. They need to be gone before releasing anything (including development versions as long as they're publically available).
+
+However upon request, a license is likely to be granted.
+We just haven't figured out which one yet.
+
+Exceptions may be granted in a seperate LICENSE file in the subfolder.
